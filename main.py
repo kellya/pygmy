@@ -84,7 +84,10 @@ def home():
             result_cursor = cursor.execute(insert_row)
             # Prepend the string with a + so we can differentiate between shortURL and custom Redirects
             encoded_string = "+" + base36.dumps(result_cursor.lastrowid)
-        return render_template('home.html', short_url=host + encoded_string)
+        return render_template('home.html',
+                               short_url=host + encoded_string,
+                               keyword=keyword,
+                               )
     return render_template('home.html')
 
 
@@ -123,6 +126,9 @@ def redirect_short_url(short_url):
 
 
 
+@app.route('/help')
+def help():
+    return render_template('help.html')
 if __name__ == '__main__':
     # This code checks whether database table is created or not
     table_check()

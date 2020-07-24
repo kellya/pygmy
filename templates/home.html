@@ -1,45 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-      <head>
-         <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-      </head>
-      <body>
-         <nav class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container">
-               <div class="navbar-header">
-                  <a class="navbar-brand" href="#">Shorty</a>
-               </div>
-               <div id="navbar" class="navbar-collapse collapse">
-               </div>
-               <!--/.navbar-collapse -->
-            </div>
-         </nav>
-         <!-- Main jumbotron for a primary marketing message or call to action -->
-         <div class="jumbotron">
-            <div class="container">
-               <br />
-               {% if not short_url %}
-               <div class="row">
-                  <div class="col-md-offset-5 col-md-3">
-                     <h4>Enter URL to shorten</h4>
-                     <form method="post" class="navbar-form navbar-right" action="">
+<head>
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/9da1ddd86e.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">Shorty</a>
+            <a href="/help"><i class="fas fa-question-circle fa-2x"></i></a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+        </div>
+        <!--/.navbar-collapse -->
+    </div>
+</nav>
+<!-- Main jumbotron for a primary marketing message or call to action -->
+<div class="jumbotron">
+    <div class="container">
+        <br />
+        {% if not short_url %}
+            <div class="row">
+                <div class="col-md-offset-3 col-md-3">
+                    <h4>Enter URL to shorten</h4>
+                    <form method="post" class="navbar-form navbar-right" action="">
                         <div class="form-group">
-                           <input type="text" id="url" name="url" class="form-control input-lg chat-input" placeholder="URL" />
+                            <input type="text" id="url" name="url" class="form-control input-lg chat-input" placeholder="URL" />
+                            <small id="urlhelp" class="form-text text-muted">
+                                Enter the destination URL.  You may specify the scheme (http/https) if you do not http will be defaulted
+                            </small>
                             <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
-                           <button type="submit" class="btn btn-lg btn-info">Submit</button>
+                            <small id="keyhelp" class="form-text text-muted">
+                                You may specify an optional keyword to use as /&lt;keyword&gt;
+                            </small>
+                            <br>
+                            <button type="submit" class="btn btn-lg btn-info">Submit</button>
                         </div>
-                     </form>
-                  </div>
-               </div>
-               {% else %}
-               <div>
-                  Your shortened URL is: <a href="{{short_url}}"> {{short_url}}</a>
-               </div>
-               {% endif %}
+                    </form>
+                </div>
             </div>
-         </div>
-         <footer>
-         </footer>
-      </body>
-   </html>
+        {% else %}
+            <div>
+                <p>
+                    Your shortened URL is: <a href="{{short_url}}"> {{short_url}}</a>
+                </p>
+                {% if keyword %}
+                    <div>
+                        <p>
+                            You may also use your selected keyword: <a href="/{{ keyword }}"> {{ keyword }}</a>
+                        </p>
+                    </div>
+                {% endif %}
+
+            </div>
+        {% endif %}
+    </div>
+</div>
+<footer>
+</footer>
+</body>
+</html>
