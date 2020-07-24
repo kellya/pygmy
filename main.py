@@ -3,7 +3,8 @@ from flask import Flask, request, render_template, redirect
 from sqlite3 import OperationalError
 import sqlite3
 import base36
-import datetime, calendar
+import datetime
+import calendar
 
 host = 'http://localhost:5000/'
 
@@ -58,6 +59,7 @@ def hit_increase(recordid):
                 WHERE ID = {recordid}
 """
         result_cursor = cursor.execute(update_sql)
+
 
 # Home page where user should enter
 @app.route('/', methods=['GET', 'POST'])
@@ -124,11 +126,11 @@ def redirect_short_url(short_url):
     return redirect(redirect_url)
 
 
-
-
 @app.route('/help')
 def help():
     return render_template('help.html')
+
+
 if __name__ == '__main__':
     # This code checks whether database table is created or not
     table_check()
