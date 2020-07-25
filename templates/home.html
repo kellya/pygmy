@@ -44,12 +44,12 @@
         {% else %}
             <div>
                 <p>
-                    Your shortened URL is: <a href="{{short_url}}"> {{short_url}}</a>
+                    Your shortened URL is: <a href="/{{ short_url }}"> {{ url_base }}/{{short_url}}</a>
                 </p>
                 {% if keyword %}
                     <div>
                         <p>
-                            You may also use your selected keyword: <a href="/{{ keyword }}"> {{ keyword }}</a>
+                            You may also use your selected keyword: <a href="/{{ keyword }}"> {{ url_base }}/{{ keyword }}</a>
                         </p>
                     </div>
                 {% endif %}

@@ -6,8 +6,6 @@ import base36
 import datetime
 import calendar
 
-host = 'http://localhost:5000/'
-
 
 def table_check():
     """Verify the tables exist in the db"""
@@ -86,11 +84,18 @@ def home():
             result_cursor = cursor.execute(insert_row)
             # Prepend the string with a + so we can differentiate between shortURL and custom Redirects
             encoded_string = "+" + base36.dumps(result_cursor.lastrowid)
+            url_base = f'{request.scheme}://{request.host}'
         return render_template('home.html',
-                               short_url=host + encoded_string,
+                               url_base=url_base,
+                               short_url=encoded_string,
                                keyword=keyword,
                                )
     return render_template('home.html')
+
+
+@app.route('/help')
+def help():
+    return render_template('help.html')
 
 
 @app.route('/<short_url>')
@@ -98,7 +103,7 @@ def redirect_short_url(short_url):
     short_url = short_url.lower()
     if short_url[0] == "+":
         decoded_string = base36.loads(short_url)
-        redirect_url = 'http://localhost:5000'
+        redirect_url = request.host
         with sqlite3.connect('urls.db') as conn:
             cursor = conn.cursor()
             select_row = """
@@ -124,11 +129,6 @@ def redirect_short_url(short_url):
             except Exception as e:
                 print(e)
     return redirect(redirect_url)
-
-
-@app.route('/help')
-def help():
-    return render_template('help.html')
 
 
 if __name__ == '__main__':
