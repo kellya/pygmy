@@ -22,18 +22,24 @@
     <div class="container">
         <br />
         {% if not short_url %}
+            {% if errors|length > 0 %}
+                <div class="alert alert-warning" role="alert">
+                {% for error in errors %}
+                    {{ error }}
+                {% endfor %}
+                </div>
+            {% endif %}
             <div class="row">
                 <div class="col-md-offset-3 col-md-3">
-                    <h4>Enter URL to shorten</h4>
                     <form method="post" class="navbar-form navbar-right" action="">
                         <div class="form-group">
-                            <input type="text" id="url" name="url" class="form-control input-lg chat-input" placeholder="URL" />
+                            <input type="text" id="url" name="url" class="form-control input-lg chat-input" placeholder="URL to shorten" />
                             <small id="urlhelp" class="form-text text-muted">
-                                Enter the destination URL.  You may specify the scheme (http/https) if you do not http will be defaulted
+                                Enter the destination URL.
                             </small>
                             <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
                             <small id="keyhelp" class="form-text text-muted">
-                                You may specify an optional keyword to use as /&lt;keyword&gt;
+                               To make a URL like {{ url_base }} /keyword
                             </small>
                             <br>
                             <button type="submit" class="btn btn-lg btn-info">Submit</button>
