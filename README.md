@@ -9,10 +9,8 @@ addition to the "random" short link
 * Create a shortend URL from any URL entered
 * Reporting (Hit count is updated, but actual report is planned)
 * Link time tracking (tracks create date and last time it was hit)
-
-## Planned
-* Multi-user (partially implemented)
 * External Authentication
+* Multi-user (partially implemented)
 
 # Methodology
 When an entry is added, it is added to the DB and given a unique "key".  This

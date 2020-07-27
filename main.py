@@ -90,7 +90,6 @@ def hit_increase(recordid):
 @app.route('/', methods=['GET', 'POST'])
 @ldap.basic_auth_required
 def home():
-    print(g.ldap_username)
     errors = []
     if request.method == 'POST':
         original_url = request.form.get('url')
