@@ -185,4 +185,4 @@ def redirect_short_url(short_url):
 if __name__ == '__main__':
     # This code checks whether database table is created or not
     table_check()
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
