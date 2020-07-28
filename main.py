@@ -31,7 +31,7 @@ def table_check():
         "createTime" INTEGER,
         "lastUsed" INTEGER,
         "hit" INTEGER DEFAULT 0,
-        "keyword" TEXT
+        "keyword" TEXT UNIQUE
         );
         """
     with sqlite3.connect('urls.db') as conn:
