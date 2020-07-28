@@ -17,9 +17,12 @@
             <img alt="URL submit form" src="{{ url_for('static', filename='form_url.png') }}">
 
         </p>
-        <p>Note that the URL validator is expecting there to be a path included.  So if you just type www.franklin.edu
-        you will get an error, because there is no path present.  You have to end the URL with a / if you are going to
+        <p>
+            <div class="alert alert-dark" role="alert">
+                Note that the URL validator is expecting there to be a path included.  So if you just type www.franklin.edu
+            you will get an error, because there is no path present.  You have to end the URL with a / if you are going to
         a base URL.  So http://www.example.com will give an error, but http://www.example.com/ will work.
+    </div>
         <p>Once you hit the Submit button, you will see the results page which will show your new shortened URL</p>
         <h3>Expected URL format?</h3>
         <p>
@@ -44,8 +47,10 @@
             they will be the same regardless of hitting the /keyword or /+0 &quot;random&quot; version.
         </p>
         <p>
-            Note: /keyword shortcuts are global.  If you want a /testing keyword, but that keyword is already in use,
-            you will get an error
+            <div class="alert alert-dark" role="alert">
+                Note: /keyword shortcuts are global.  If you want a /testing keyword, but that keyword is already in use,
+                you will get an error
+            </div>
         </p>
     </div>
     {% endblock %}

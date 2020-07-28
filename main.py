@@ -105,6 +105,8 @@ def home():
             original_url = 'http://' + original_url
         if not uri_validator(original_url):
             errors.append(f'URL {original_url} is not in the proper format')
+        if not keyword[0].isalnum():
+            errors.append(f'Keyword must start with an alphanumeric character')
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
             with sqlite3.connect('urls.db') as conn:
