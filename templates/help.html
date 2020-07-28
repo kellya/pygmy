@@ -1,44 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/9da1ddd86e.js" crossorigin="anonymous"></script>
-</head>
-<body>
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/">Shorty</a>
-            <a href="/help"><i class="fas fa-question-circle fa-2x"></i></a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-        </div>
-        <!--/.navbar-collapse -->
-    </div>
-</nav>
-<!-- Main jumbotron for a primary marketing message or call to action -->
+{% extends "base.html" %}
+{% block body %}
 <div class="jumbotron">
     <div class="container">
         <br />
-        <h2>Create a shortened URL with a random destination</h2>
+        <h1>What is this?</h1>
         <p>
-            To create a URL that will look something like /+x, simply add your destination to the URL field on the form
-            and hit the submit button.
+            This takes a url that is very long and gives a shortend version that when hit will redirect to the long version.
+            For example, if you have a url that is https://www.example.com/path/to/some/stuff?with&lots&of&stuff&after&it, you
+            can create a shortend URL that is just {{ url_base }}/+0 that you can easily communicate, or link to where you don't
+            want to jumble up the view with a very long URL.
         </p>
-        <p>Upon successful submit, you will see the reseults page which will show your new shortened URL</p>
-        <h3>URL format?</h3>
+        <h2>Ok cool, how do I add a shortend URL</h2>
+        <h3>Create a shortened URL with a random destination</h3>
+        <p>
+            Add a destination in the first box.  This should be in the format of https://www.example.com/stuff
+            <img alt="URL submit form" src="{{ url_for('static', filename='form_url.png') }}">
+
+        </p>
+        <p>Note that the URL validator is expecting there to be a path included.  So if you just type www.franklin.edu
+        you will get an error, because there is no path present.  You have to end the URL with a / if you are going to
+        a base URL.  So http://www.example.com will give an error, but http://www.example.com/ will work.
+        <p>Once you hit the Submit button, you will see the results page which will show your new shortened URL</p>
+        <h3>Expected URL format?</h3>
         <p>
             You may specify the URL with or without the scheme (the http:// part at the beginning of the URL).
             Note that this service only deals with WEB redirects, so you may not use anything other than http or https
         </p>
+        <p>
+            As noted above, your URL must have a path included in it.  So if you are going to a base domain you
+            <em>must</em> end the URL with a /.  If you have a url like http://www.example.com/something, then the
+            /something is the path part.
+        </p>
         <p>If you do not specify a scheme, it will default to http://, which will typically just work (though you may
-        get an addtional https redirect).</p>
+        get an additional https redirect from the destination webserver).</p>
         <h2>Create a custom keyword-based URL</h2>
-        <p>Shorty also allows you to optionally add a /keyword URL type too.  If you specify something in the keyword
-        field, you will get a random short URL AND your custom string.  Both will work when you specify the destiation name</p>
+        <p>
+            You may optionally add a /keyword URL type by specifying that keyword in addition to the destination URL
+            <img alt="URL submit form" src="{{ url_for('static', filename='form_keyword.png') }}">
+        </p>
+        <p>
+            If you specify something in the keyword field, you will get a
+            random short URL AND your custom string.  Both URLS target the same redirect, so as far as hit count stats,
+            they will be the same regardless of hitting the /keyword or /+0 &quot;random&quot; version.
+        </p>
+        <p>
+            Note: /keyword shortcuts are global.  If you want a /testing keyword, but that keyword is already in use,
+            you will get an error
+        </p>
     </div>
-    <footer>
-    </footer>
-</body>
-</html>
+    {% endblock %}

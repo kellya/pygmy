@@ -135,6 +135,12 @@ def help():
     return render_template('help.html')
 
 
+@app.route('/mylinks')
+@ldap.basic_auth_required
+def mylinks():
+    return render_template('links.html')
+
+
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
     short_url = short_url.lower()
