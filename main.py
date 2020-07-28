@@ -168,6 +168,7 @@ def redirect_short_url(short_url):
     return redirect(redirect_url)
 
 
+
 if __name__ == '__main__':
     # This code checks whether database table is created or not
     table_check()
