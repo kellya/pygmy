@@ -43,18 +43,25 @@ def table_check():
 
 
 app = Flask(__name__)
-ldap_vars = ['LDAP_HOST', 'LDAP_BASE_DN', 'LDAP_USERNAME', 'LDAP_PASSWORD']
+ldap_vars = [
+    'LDAP_HOST',
+    'LDAP_BASE_DN',
+    'LDAP_USERNAME',
+    'LDAP_PASSWORD',
+    'LDAP_REALM_NAME',
+    'LDAP_USER_OBJECT_FILTER',
+]
 for var in ldap_vars:
     if var not in os.environ:
         raise EnvironmentError(f'{var} must be exported as an environment variable\n\t \'export {var}="value"\'')
 
-app.config['LDAP_REALM_NAME'] = 'Franklin SSO'
+app.config['LDAP_REALM_NAME'] = os.environ['LDAP_REALM_NAME']
 app.config['LDAP_HOST'] = os.environ['LDAP_HOST']
 app.config['LDAP_BASE_DN'] = os.environ['LDAP_BASE_DN']
 app.config['LDAP_USERNAME'] = os.environ['LDAP_USERNAME']
 app.config['LDAP_PASSWORD'] = os.environ['LDAP_PASSWORD']
 app.config['LDAP_OPENLDAP'] = True
-app.config['LDAP_USER_OBJECT_FILTER'] = '(&(objectclass=inetOrgPerson)(uid=%s))'
+app.config['LDAP_USER_OBJECT_FILTER'] = os.environ['LDAP_USER_OBJECT_FILTER']
 ldap = LDAP(app)
 
 
