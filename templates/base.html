@@ -4,14 +4,13 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/9da1ddd86e.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     {% block head %}
     {% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-dark bg-dark navbar-fixed-top">
-        <div class="col-md-12">
             <ul class="nav nav-pills nav-fill">
                 <li class="nav-link">
                     <a href="/"><i class="nav-item fas fa-home"></i>Home</a>
@@ -21,6 +20,12 @@
                 </li>
                 <li class="nav-link">
                     <a href="/help"><i class="nav-item fas fa-question-circle"></i>Help</a>
+                </li>
+                <li class="nav-link">
+                    <a href="https://git.admin.franklin.edu/tins/shorty/issues" title="Report issues or request features"><i class="nav-item fas fa-bug"></i>Issues</a>
+                </li>
+                <li class="nav-link">
+                    <a href="/logout"><i class="nav-item fas fa-sign-out-alt"></i>Logout</a>
                 </li>
             </ul>
         </div>

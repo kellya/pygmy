@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, request, render_template, redirect, g
+from flask import Flask, request, render_template, redirect, g, Response
 from flask_simpleldap import LDAP
 from urllib.parse import urlparse
 from sqlite3 import OperationalError
@@ -148,6 +148,9 @@ def home():
 def help():
     return render_template('help.html')
 
+@app.route('/logout')
+def logout():
+    return Response('User Logout', 401, {'WWW-Authenticate':'Basic realm="Franklin SSO"'})
 
 @app.route('/mylinks')
 @ldap.basic_auth_required
@@ -190,7 +193,10 @@ def redirect_short_url(short_url):
                 hit_increase(short_url)
             except Exception as e:
                 print(e)
-    return redirect(redirect_url)
+    try:
+        return redirect(redirect_url)
+    except UnboundLocalError:
+        return render_template('error.html')
 
 
 @app.template_filter('humantime')
