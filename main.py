@@ -8,6 +8,7 @@ import base36
 import datetime
 import calendar
 import os
+import time
 
 
 def uri_validator(x):
@@ -105,8 +106,12 @@ def home():
             original_url = 'http://' + original_url
         if not uri_validator(original_url):
             errors.append(f'URL {original_url} is not in the proper format')
-        if not keyword[0].isalnum():
-            errors.append(f'Keyword must start with an alphanumeric character')
+        try:
+            if not keyword[0].isalnum():
+                errors.append(f'Keyword must start with an alphanumeric character')
+        except IndexError:
+            # If we wren't given a keyword, just pass
+            pass
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
             with sqlite3.connect('urls.db') as conn:
@@ -147,7 +152,12 @@ def help():
 @app.route('/mylinks')
 @ldap.basic_auth_required
 def mylinks():
-    return render_template('links.html')
+    with sqlite3.connect('urls.db') as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        result_cursor = cursor.execute(f"SELECT * FROM WEB_URL WHERE owner = '{g.ldap_username}'")
+        results = [dict(row) for row in result_cursor.fetchall()]
+    return render_template('links.html', results=results)
 
 
 @app.route('/<short_url>')
@@ -183,6 +193,24 @@ def redirect_short_url(short_url):
     return redirect(redirect_url)
 
 
+@app.template_filter('humantime')
+def format_datetime(value):
+    """Format a date time to (Default): d Mon YYYY HH:MM P"""
+    if value is None:
+        return ""
+    return time.strftime('%Y-%m-%d', time.localtime(value))
+
+
+@app.template_filter('shortcode')
+def format_shortcode(value):
+    return "+" + base36.dumps(value)
+
+@app.template_filter('elipses')
+def format_elipses(value):
+    if len(value) > 100:
+        return value[:100] + "..."
+    else:
+        return value
 
 if __name__ == '__main__':
     # This code checks whether database table is created or not

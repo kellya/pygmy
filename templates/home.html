@@ -1,22 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Franklin URL Shortening{% endblock %}
 {% block body %}
-<nav class="navbar navbar-inverse navbar-fixed-top">
-	<div class="col-md-12">
-			<ul class="nav nav-pills">
-				<li class="nav-item">
-                    <a href="/"><i class="nav-link fas fa-home"></i>Home</a>
-				</li>
-				<li class="nav-item">
-                    <a href="/mylinks"><i class="nav-link fas fa-external-link-alt"></i>My Shortcuts</a>
-				</li>
-				<li class="nav-item">
-                    <a href="/help"><i class="nav-link fas fa-question-circle"></i>Help</a>
-				</li>
-			</ul>
-		</div>
-	</nav>
-<!-- Main jumbotron for a primary marketing message or call to action -->
 <div class="jumbotron">
     <div class="container">
         <br />
@@ -51,6 +35,7 @@
                 <p>
                     Your shortened URL is: <a href="/{{ short_url }}"> {{ url_base }}/{{short_url}}</a>
                 </p>
+            </div>
                 {% if keyword %}
                     <div>
                         <p>

@@ -4,23 +4,23 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/9da1ddd86e.js" crossorigin="anonymous"></script>
     {% block head %}
     {% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-dark bg-dark navbar-fixed-top">
         <div class="col-md-12">
-            <ul class="nav nav-pills">
-                <li class="nav-item">
-                    <a href="/"><i class="nav-link fas fa-home"></i>Home</a>
+            <ul class="nav nav-pills nav-fill">
+                <li class="nav-link">
+                    <a href="/"><i class="nav-item fas fa-home"></i>Home</a>
                 </li>
-                <li class="nav-item">
-                    <a href="/mylinks"><i class="nav-link fas fa-external-link-alt"></i>My Shortcuts</a>
+                <li class="nav-link">
+                    <a href="/mylinks"><i class="nav-item fas fa-external-link-alt"></i>My Shortcuts</a>
                 </li>
-                <li class="nav-item">
-                    <a href="/help"><i class="nav-link fas fa-question-circle"></i>Help</a>
+                <li class="nav-link">
+                    <a href="/help"><i class="nav-item fas fa-question-circle"></i>Help</a>
                 </li>
             </ul>
         </div>
