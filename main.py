@@ -194,23 +194,27 @@ def redirect_short_url(short_url):
 
 
 @app.template_filter('humantime')
-def format_datetime(value):
-    """Format a date time to (Default): d Mon YYYY HH:MM P"""
+def format_datetime(value, timeformat='%Y-%m-%d'):
     if value is None:
         return ""
-    return time.strftime('%Y-%m-%d', time.localtime(value))
+    return time.strftime(timeformat, time.localtime(value))
 
 
 @app.template_filter('shortcode')
 def format_shortcode(value):
+    """Return the base36 encoded short URL version of a number"""
     return "+" + base36.dumps(value)
 
 @app.template_filter('elipses')
-def format_elipses(value):
-    if len(value) > 100:
-        return value[:100] + "..."
-    else:
+def format_elipses(value, length=100):
+    """
+    Return a string ending in ... for the string given
+    Specify a negative number in the template to return everything
+    """
+    if len(value) < length:
         return value
+    else:
+        return value[:length] + "..."
 
 if __name__ == '__main__':
     # This code checks whether database table is created or not
