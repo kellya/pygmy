@@ -188,7 +188,7 @@ def home():
     return render_template('home.html', errors=errors, permissions=permissions)
 
 
-@app.route('/help')
+@app.route('/_help')
 def showhelp():
     """
     Displays the help page
@@ -199,7 +199,7 @@ def showhelp():
     return render_template('help.html', permissions=permissions)
 
 
-@app.route('/logout')
+@app.route('/_logout')
 def logout():
     """
    Haphazardly handles a logout action for a basic authentication, which isn't really a thing for basic-auth
@@ -208,7 +208,7 @@ def logout():
     return Response('User Logout', 401, {'WWW-Authenticate': 'Basic realm="Franklin SSO"'})
 
 
-@app.route('/mylinks')
+@app.route('/_mylinks')
 @ldap.basic_auth_required
 def mylinks():
     """

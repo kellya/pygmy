@@ -17,12 +17,12 @@
                     {% for result in results %}
                         <tr>
                             <td>
-                                <a href="/{{ result['id']|shortcode }}">{{ result['id']|shortcode }}
+                                <a href="/{{ result['id']|shortcode }}" target="_blank">{{ result['id']|shortcode }}
                                 {% if result['keyword'] %}
                                 | {{ result['keyword'] }}
                                 {% endif %}</a>
                             </td>
-                            <td><a href="{{ result['url'] }}" title="{{ result['url'] }}">{{ result['url']|elipses(50) }}</a></td>
+                            <td><a href="{{ result['url'] }}" title="{{ result['url'] }}" target="_blank">{{ result['url']|elipses(50) }}</a></td>
                             <td>{{ result['hit'] }}</td>
                             <td>{{ result['createTime']|humantime }}</td>
                             <td>{{ result['lastUsed']|humantime }}</td>
