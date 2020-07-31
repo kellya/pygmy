@@ -96,41 +96,41 @@ def hit_increase(recordid):
         result_cursor = cursor.execute(update_sql)
 
         update_sql = f'UPDATE redirect SET lastUsed = {timestamp} WHERE id = {recordid}'
-        result_cursor = cursor.execute(update_sql)
+        cursor.execute(update_sql)
 
 
-def setDefaultPermissions(username):
+def set_default_permissionss(username):
     """
     Create a default permission set for a user if they are not already in the db
     :param username:UID from LDAP
     :return:  None
     """
-    insertQuery = f"INSERT INTO permission (id, edit) values ('{username}', 1)"
+    insert_query = f"INSERT INTO permission (id, edit) values ('{username}', 1)"
     with sqlite3.connect('urls.db') as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute(insertQuery)
+            cursor.execute(insert_query)
         except Exception as e:
             print(e)
 
 
-def getPermissions(username):
+def get_permissions(username):
     """
     Gets user permissions from db, or creates a default value if user isn't already in the DB
     :param username: uid from LDAP
     :return: A dictionary containing permissions as returned from the DB
     """
-    returnQuery = f"SELECT * FROM permission WHERE id = '{username}'"
+    return_query = f"SELECT * FROM permission WHERE id = '{username}'"
     with sqlite3.connect('urls.db') as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         try:
-            result_cursor = cursor.execute(returnQuery)
+            result_cursor = cursor.execute(return_query)
             results = [dict(row) for row in result_cursor.fetchall()]
             return results[0]
         except IndexError:
-            setDefaultPermissions(username)
-            getPermissions(username)
+            set_default_permissionss(username)
+            get_permissions(username)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -141,7 +141,7 @@ def home():
     :return:  jinja template for /home.html
     """
     errors = []
-    permissions = getPermissions(g.ldap_username)
+    permissions = get_permissions(g.ldap_username)
     if request.method == 'POST':
         original_url = request.form.get('url')
         keyword = request.form.get('keyword')
@@ -215,7 +215,7 @@ def mylinks():
     Displays all the links created by the logged-in user
     :return: jinja template render for links.html
     """
-    permissions = getPermissions(g.ldap_username)
+    permissions = get_permissions(g.ldap_username)
     with sqlite3.connect('urls.db') as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
@@ -299,6 +299,5 @@ def format_elipses(value, length=100):
 
 
 if __name__ == '__main__':
-    # This code checks whether database table is created or not
     table_check()
     app.run(host="0.0.0.0", debug=True)
