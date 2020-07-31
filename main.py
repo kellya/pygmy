@@ -92,23 +92,56 @@ def hit_increase(recordid):
 
     with sqlite3.connect('urls.db') as conn:
         cursor = conn.cursor()
-        update_sql = f"""
-                UPDATE redirect SET hit = hit + 1 WHERE id = {recordid}
-            """
+        update_sql = f'UPDATE redirect SET hit = hit + 1 WHERE id = {recordid}'
         result_cursor = cursor.execute(update_sql)
 
-        update_sql = f"""
-            UPDATE redirect SET lastUsed = {timestamp}
-                WHERE id = {recordid}
-"""
+        update_sql = f'UPDATE redirect SET lastUsed = {timestamp} WHERE id = {recordid}'
         result_cursor = cursor.execute(update_sql)
 
 
-# Home page where user should enter
+def setDefaultPermissions(username):
+    """
+    Create a default permission set for a user if they are not already in the db
+    :param username:UID from LDAP
+    :return:  None
+    """
+    insertQuery = f"INSERT INTO permission (id, edit) values ('{username}', 1)"
+    with sqlite3.connect('urls.db') as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(insertQuery)
+        except Exception as e:
+            print(e)
+
+
+def getPermissions(username):
+    """
+    Gets user permissions from db, or creates a default value if user isn't already in the DB
+    :param username: uid from LDAP
+    :return: A dictionary containing permissions as returned from the DB
+    """
+    returnQuery = f"SELECT * FROM permission WHERE id = '{username}'"
+    with sqlite3.connect('urls.db') as conn:
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        try:
+            result_cursor = cursor.execute(returnQuery)
+            results = [dict(row) for row in result_cursor.fetchall()]
+            return results[0]
+        except IndexError:
+            setDefaultPermissions(username)
+            getPermissions(username)
+
+
 @app.route('/', methods=['GET', 'POST'])
 @ldap.basic_auth_required
 def home():
+    """
+    Display the home/entry page for the shortener
+    :return:  jinja template for /home.html
+    """
     errors = []
+    permissions = getPermissions(g.ldap_username)
     if request.method == 'POST':
         original_url = request.form.get('url')
         keyword = request.form.get('keyword')
@@ -120,22 +153,22 @@ def home():
             if not keyword[0].isalnum():
                 errors.append(f'Keyword must start with an alphanumeric character')
         except IndexError:
-            # If we wren't given a keyword, just pass
+            # If we weren't given a keyword, just pass
             pass
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
             with sqlite3.connect('urls.db') as conn:
                 cursor = conn.cursor()
                 if len(keyword) > 0:
-                    insert_row = """
+                    insert_row = f"""
                         INSERT INTO redirect (url, owner, createTime, keyword)
-                            VALUES ('%s', '%s', '%s', '%s')
-                        """ % (original_url, g.ldap_username, timestamp, keyword)
+                        VALUES ('{original_url}', '{g.ldap_username}', '{timestamp}', '{keyword}')
+                    """
                 else:
-                    insert_row = """
+                    insert_row = f"""
                         INSERT INTO redirect (url, owner, createTime)
-                            VALUES ('%s', '%s', '%s')
-                        """ % (original_url, g.ldap_username, timestamp)
+                            VALUES ('{original_url}', '{g.ldap_username}', '{timestamp}')
+                        """
 
                 try:
                     result_cursor = cursor.execute(insert_row)
@@ -150,43 +183,62 @@ def home():
                                    short_url=encoded_string,
                                    keyword=keyword,
                                    errors=errors,
+                                   permissions=permissions,
                                    )
-    return render_template('home.html', errors=errors)
+    return render_template('home.html', errors=errors, permissions=permissions)
 
 
 @app.route('/help')
 def showhelp():
-    return render_template('help.html')
+    """
+    Displays the help page
+    :return: jinja template for help.html
+    """
+    # FIXME: This permissions setting shouldn't be forced here, but permissions is called from base, so it has to exist
+    permissions = {'admin': None, 'edit': None, 'keyword': None}
+    return render_template('help.html', permissions=permissions)
 
 
 @app.route('/logout')
 def logout():
+    """
+   Haphazardly handles a logout action for a basic authentication, which isn't really a thing for basic-auth
+    :return:
+    """
     return Response('User Logout', 401, {'WWW-Authenticate': 'Basic realm="Franklin SSO"'})
 
 
 @app.route('/mylinks')
 @ldap.basic_auth_required
 def mylinks():
+    """
+    Displays all the links created by the logged-in user
+    :return: jinja template render for links.html
+    """
+    permissions = getPermissions(g.ldap_username)
     with sqlite3.connect('urls.db') as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}'")
         results = [dict(row) for row in result_cursor.fetchall()]
-    return render_template('links.html', results=results)
+    return render_template('links.html', results=results, permissions=permissions)
 
 
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
+    """
+    Handles shortlink/keyword redirects by pulling the destination from the DB matching a base36 encoded version
+    of the shortlink, or a /keyword link if the short_url does not start with a +
+    :param short_url:
+    :return:
+    """
     short_url = short_url.lower()
     if short_url[0] == "+":
         decoded_string = base36.loads(short_url)
         redirect_url = request.host
         with sqlite3.connect('urls.db') as conn:
             cursor = conn.cursor()
-            select_row = """
-                    SELECT url FROM redirect
-                        WHERE id=%s;
-                    """ % (decoded_string)
+            select_row = f"""SELECT url FROM redirect WHERE id={decoded_string}"""
             result_cursor = cursor.execute(select_row)
             try:
                 redirect_url = result_cursor.fetchone()[0]
@@ -213,6 +265,12 @@ def redirect_short_url(short_url):
 
 @app.template_filter('humantime')
 def format_datetime(value, timeformat='%Y-%m-%d'):
+    """
+    Filter to convert epoch (value) to the timeformat
+    :param value:
+    :param timeformat:
+    :return:
+    """
     if value is None:
         return ""
     return time.strftime(timeformat, time.localtime(value))
@@ -220,7 +278,11 @@ def format_datetime(value, timeformat='%Y-%m-%d'):
 
 @app.template_filter('shortcode')
 def format_shortcode(value):
-    """Return the base36 encoded short URL version of a number"""
+    """
+    Return the base36 encoded short URL version of a number
+    :param value:
+    :return:  shortcode of "+<base36 value of <value>>"
+    """
     return "+" + base36.dumps(value)
 
 

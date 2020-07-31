@@ -20,10 +20,12 @@
                             <small id="urlhelp" class="form-text text-muted">
                                 Enter the destination URL.
                             </small>
+                            {% if permissions['keyword'] %}
                             <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
                             <small id="keyhelp" class="form-text text-muted">
                                To make a URL like {{ url_base }}/keyword
                             </small>
+                                {% endif %}
                             <br>
                             <button type="submit" class="btn btn-lg btn-info">Submit</button>
                         </div>
