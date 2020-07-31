@@ -10,6 +10,10 @@ import calendar
 import os
 import time
 
+# FIXME: This permissions setting shouldn't be forced here, but permissions is called from base, so it has to exist
+# This is defined globally so that it can be referenced in any function, local permissions var will override and
+# make it work for actual permissions
+permissions = {'id': None, 'admin': None, 'edit': None, 'keyword': None}
 
 def uri_validator(uri):
     """ Determines if a given URL is valid and returns True/False"""
@@ -194,8 +198,6 @@ def showhelp():
     Displays the help page
     :return: jinja template for help.html
     """
-    # FIXME: This permissions setting shouldn't be forced here, but permissions is called from base, so it has to exist
-    permissions = {'admin': None, 'edit': None, 'keyword': None}
     return render_template('help.html', permissions=permissions)
 
 
@@ -260,7 +262,7 @@ def redirect_short_url(short_url):
     try:
         return redirect(redirect_url)
     except UnboundLocalError:
-        return render_template('error.html', url=short_url)
+        return render_template('error.html', permissions=permissions, url=short_url)
 
 
 @app.template_filter('humantime')
