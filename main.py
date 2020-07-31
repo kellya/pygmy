@@ -11,12 +11,12 @@ import os
 import time
 
 
-def uri_validator(x):
+def uri_validator(uri):
     """ Determines if a given URL is valid and returns True/False"""
     # This code was obtained from a stackoverflow answer at:
     # https://stackoverflow.com/questions/7160737/python-how-to-validate-a-url-in-python-malformed-or-not
     try:
-        result = urlparse(x)
+        result = urlparse(uri)
         return all([result.scheme, result.netloc, result.path])
     except:
         return False
