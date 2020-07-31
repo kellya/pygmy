@@ -240,7 +240,7 @@ def redirect_short_url(short_url):
         redirect_url = request.host
         with sqlite3.connect('urls.db') as conn:
             cursor = conn.cursor()
-            select_row = f"""SELECT url FROM redirect WHERE id={decoded_string}"""
+            select_row = f"SELECT url FROM redirect WHERE id={decoded_string}"
             result_cursor = cursor.execute(select_row)
             try:
                 redirect_url = result_cursor.fetchone()[0]
@@ -250,9 +250,7 @@ def redirect_short_url(short_url):
     else:
         with sqlite3.connect('urls.db') as conn:
             cursor = conn.cursor()
-            select_row = f"""
-                SELECT url FROM redirect WHERE keyword = '{short_url}';
-            """
+            select_row = f"SELECT url FROM redirect WHERE keyword = '{short_url}';"
             result_cursor = cursor.execute(select_row)
             try:
                 redirect_url = result_cursor.fetchone()[0]
