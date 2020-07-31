@@ -99,7 +99,7 @@ def hit_increase(recordid):
         cursor.execute(update_sql)
 
 
-def set_default_permissionss(username):
+def set_default_permissions(username):
     """
     Create a default permission set for a user if they are not already in the db
     :param username:UID from LDAP
@@ -129,7 +129,7 @@ def get_permissions(username):
             results = [dict(row) for row in result_cursor.fetchall()]
             return results[0]
         except IndexError:
-            set_default_permissionss(username)
+            set_default_permissions(username)
             get_permissions(username)
 
 
