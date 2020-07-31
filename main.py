@@ -24,10 +24,10 @@ def uri_validator(x):
 
 def table_check():
     """Verify the tables exist in the db"""
-    create_table = """
-        CREATE TABLE "WEB_URL"(
-        "ID" INTEGER PRIMARY KEY AUTOINCREMENT,
-        "URL" TEXT NOT NULL,
+    create_redirect_table = """
+        CREATE TABLE "redirect"(
+        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+        "url" TEXT NOT NULL,
         "owner" TEXT DEFAULT 0,
         "createTime" INTEGER,
         "lastUsed" INTEGER,
@@ -35,10 +35,20 @@ def table_check():
         "keyword" TEXT UNIQUE
         );
         """
+    create_permission_table = """
+        CREATE TABLE "permission" (
+        "id"	TEXT NOT NULL UNIQUE,
+        "admin"	INTEGER,
+        "edit"	INTEGER,
+        "keyword"	INTEGER,
+        PRIMARY KEY("id")
+    );
+    """
     with sqlite3.connect('urls.db') as conn:
         cursor = conn.cursor()
         try:
-            cursor.execute(create_table)
+            cursor.execute(create_redirect_table)
+            cursor.execute(create_permission_table)
         except OperationalError:
             pass
 
@@ -77,19 +87,19 @@ def hit_increase(recordid):
         # We need to get the ID for the shortname/keyword
         with sqlite3.connect('urls.db') as conn:
             cursor = conn.cursor()
-            result_cursor = cursor.execute(f"SELECT ID FROM WEB_URL WHERE keyword = '{recordid}'")
+            result_cursor = cursor.execute(f"SELECT id FROM redirect WHERE keyword = '{recordid}'")
             recordid = result_cursor.fetchone()[0]
 
     with sqlite3.connect('urls.db') as conn:
         cursor = conn.cursor()
         update_sql = f"""
-                UPDATE WEB_URL SET hit = hit + 1 WHERE ID = {recordid}
+                UPDATE redirect SET hit = hit + 1 WHERE id = {recordid}
             """
         result_cursor = cursor.execute(update_sql)
 
         update_sql = f"""
-            UPDATE WEB_URL SET lastUsed = {timestamp}
-                WHERE ID = {recordid}
+            UPDATE redirect SET lastUsed = {timestamp}
+                WHERE id = {recordid}
 """
         result_cursor = cursor.execute(update_sql)
 
@@ -118,12 +128,12 @@ def home():
                 cursor = conn.cursor()
                 if len(keyword) > 0:
                     insert_row = """
-                        INSERT INTO WEB_URL (URL, owner, createTime, keyword)
+                        INSERT INTO redirect (url, owner, createTime, keyword)
                             VALUES ('%s', '%s', '%s', '%s')
                         """ % (original_url, g.ldap_username, timestamp, keyword)
                 else:
                     insert_row = """
-                        INSERT INTO WEB_URL (URL, owner, createTime)
+                        INSERT INTO redirect (url, owner, createTime)
                             VALUES ('%s', '%s', '%s')
                         """ % (original_url, g.ldap_username, timestamp)
 
@@ -141,16 +151,18 @@ def home():
                                    keyword=keyword,
                                    errors=errors,
                                    )
-    return render_template('home.html',errors=errors)
+    return render_template('home.html', errors=errors)
 
 
 @app.route('/help')
-def help():
+def showhelp():
     return render_template('help.html')
+
 
 @app.route('/logout')
 def logout():
-    return Response('User Logout', 401, {'WWW-Authenticate':'Basic realm="Franklin SSO"'})
+    return Response('User Logout', 401, {'WWW-Authenticate': 'Basic realm="Franklin SSO"'})
+
 
 @app.route('/mylinks')
 @ldap.basic_auth_required
@@ -158,7 +170,7 @@ def mylinks():
     with sqlite3.connect('urls.db') as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
-        result_cursor = cursor.execute(f"SELECT * FROM WEB_URL WHERE owner = '{g.ldap_username}'")
+        result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}'")
         results = [dict(row) for row in result_cursor.fetchall()]
     return render_template('links.html', results=results)
 
@@ -172,8 +184,8 @@ def redirect_short_url(short_url):
         with sqlite3.connect('urls.db') as conn:
             cursor = conn.cursor()
             select_row = """
-                    SELECT URL FROM WEB_URL
-                        WHERE ID=%s;
+                    SELECT url FROM redirect
+                        WHERE id=%s;
                     """ % (decoded_string)
             result_cursor = cursor.execute(select_row)
             try:
@@ -185,7 +197,7 @@ def redirect_short_url(short_url):
         with sqlite3.connect('urls.db') as conn:
             cursor = conn.cursor()
             select_row = f"""
-                SELECT URL FROM WEB_URL WHERE keyword = '{short_url}';
+                SELECT url FROM redirect WHERE keyword = '{short_url}';
             """
             result_cursor = cursor.execute(select_row)
             try:
@@ -196,7 +208,7 @@ def redirect_short_url(short_url):
     try:
         return redirect(redirect_url)
     except UnboundLocalError:
-        return render_template('error.html')
+        return render_template('error.html', url=short_url)
 
 
 @app.template_filter('humantime')
@@ -211,6 +223,7 @@ def format_shortcode(value):
     """Return the base36 encoded short URL version of a number"""
     return "+" + base36.dumps(value)
 
+
 @app.template_filter('elipses')
 def format_elipses(value, length=100):
     """
@@ -221,6 +234,7 @@ def format_elipses(value, length=100):
         return value
     else:
         return value[:length] + "..."
+
 
 if __name__ == '__main__':
     # This code checks whether database table is created or not
