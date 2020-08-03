@@ -7,6 +7,7 @@
         {% if not short_url %}
             {% if errors|length > 0 %}
                 <div class="alert alert-warning" role="alert">
+                    <i class="nav-item fas fa-exclamation-triangle"></i>
                 {% for error in errors %}
                     {{ error }}<br />
                 {% endfor %}

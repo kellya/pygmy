@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from flask import Flask, request, render_template, redirect, g, Response
+from flask import Flask, request, render_template, redirect, g, Response, url_for
 from flask_simpleldap import LDAP
 from urllib.parse import urlparse
 from sqlite3 import OperationalError
@@ -210,7 +210,7 @@ def logout():
     return Response('User Logout', 401, {'WWW-Authenticate': 'Basic realm="Franklin SSO"'})
 
 
-@app.route('/_mylinks')
+@app.route('/_mylinks', methods=['GET'])
 @ldap.basic_auth_required
 def mylinks():
     """
@@ -218,12 +218,42 @@ def mylinks():
     :return: jinja template render for links.html
     """
     permissions = get_permissions(g.ldap_username)
+    try:
+        success = request.args['editsuccess']
+    except Exception as e:
+        success = False
+    print(f'success is: {success}')
     with sqlite3.connect('urls.db') as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}'")
         results = [dict(row) for row in result_cursor.fetchall()]
-    return render_template('links.html', results=results, permissions=permissions)
+    return render_template('links.html', results=results, permissions=permissions, editsuccess=success)
+
+
+@app.route('/_edit', methods=['GET', 'POST'])
+@ldap.basic_auth_required
+def edit_link():
+    updateurl = request.form.get('url')
+    permissions = get_permissions(g.ldap_username)
+
+    if request.method == 'GET':
+        with sqlite3.connect('urls.db') as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}' and id = '{request.args.get('id')}'")
+            results = [dict(row) for row in result_cursor.fetchall()]
+            try:
+                return render_template('edit.html', url=results[0]['url'], permissions=permissions)
+            except IndexError:
+                return render_template('edit.html', url='', permissions=permissions, errors=['No permission to edit this ID'])
+    elif request.method == 'POST':
+        with sqlite3.connect('urls.db') as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute(f"UPDATE redirect set url='{updateurl}' WHERE owner = '{g.ldap_username}' and id = '{request.args.get('id')}'")
+        return redirect(url_for('mylinks', editsuccess=True))
+
 
 
 @app.route('/<short_url>')
