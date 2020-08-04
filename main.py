@@ -238,10 +238,11 @@ def edit_link():
     permissions = get_permissions(g.ldap_username)
 
     if request.method == 'GET':
+        recordid = base36.loads(request.args.get('id'))
         with sqlite3.connect('urls.db') as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}' and id = '{request.args.get('id')}'")
+            result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}' and id = {recordid}")
             results = [dict(row) for row in result_cursor.fetchall()]
             try:
                 return render_template('edit.html', url=results[0]['url'], permissions=permissions)

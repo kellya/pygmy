@@ -5,21 +5,22 @@
         <br />
         <h1>What is this?</h1>
         <p>
-            This takes a url that is very long and gives a shortend version that when hit will redirect to the long version.
+            This takes a url that is very long and gives a shortened version that when hit will redirect to the long version.
             For example, if you have a url that is https://www.example.com/path/to/some/stuff?with&lots&of&stuff&after&it, you
-            can create a shortend URL that is just {{ url_base }}/+0 that you can easily communicate, or link to where you don't
+            can create a shortened URL that is just {{ url_base }}/+0 that you can easily communicate, or link to where you don't
             want to jumble up the view with a very long URL.
         </p>
-        <h2>Ok cool, how do I add a shortend URL</h2>
+        <h2>Ok cool, how do I add a shortened URL</h2>
         <h3>Create a shortened URL with a random destination</h3>
         <p>
             Add a destination in the first box.  This should be in the format of https://www.example.com/stuff
+            <br />
             <img alt="URL submit form" src="{{ url_for('static', filename='form_url.png') }}">
 
         </p>
         <p>
             <div class="alert alert-dark" role="alert">
-                Note that the URL validator is expecting there to be a path included.  So if you just type www.franklin.edu
+                Note that the URL validator is expecting there to be a path included.  So if you just type www.example.com
             you will get an error, because there is no path present.  You have to end the URL with a / if you are going to
         a base URL.  So http://www.example.com will give an error, but http://www.example.com/ will work.
     </div>
@@ -39,6 +40,7 @@
         <h2>Create a custom keyword-based URL</h2>
         <p>
             You may optionally add a /keyword URL type by specifying that keyword in addition to the destination URL
+           <br/>
             <img alt="URL submit form" src="{{ url_for('static', filename='form_keyword.png') }}">
         </p>
         <p>
@@ -48,9 +50,20 @@
         </p>
         <p>
             <div class="alert alert-dark" role="alert">
-                Note: /keyword shortcuts are global.  If you want a /testing keyword, but that keyword is already in use,
+            Note: /keyword shortcuts are global.  If you want a <em>testing</em> keyword, but that keyword is already in use,
                 you will get an error
             </div>
-        </p>
+        <h3>Wait a minute...I don't see a keyword option</h3>
+            <p>Since the keywords are global, this is a special permission that must be added to your account.  Please contact
+            the helpdesk to open a ticket to request this access.</p>
+        <h2>Editing a destination URL</h2>
+            <p>
+                You are able to edit the destination URL for any link which you have added from the <a href="{{ url_for('mylinks') }}"> My Shortcuts</a> Page.
+                From that page, click on the edit icon in the "Actions" column and enter the new URL you wish the shortlink/keyword to target.
+            </p>
+    <h3>Can I change a a shortlink ID or keyword?</h3>
+        <p>No, you may only change the destination URL.  The shortlinks are always assumed to go to a valid endpoint once the are created, so you are able to change the endpoint, but not the source</p>
+    <h3>Can I delete a link?</h3>
+        <p>Well even though I just said "shortlinks are always assumed to go to a valid endpoint once they are created", there is planned functionality to delete shortcuts.</p>
     </div>
     {% endblock %}
