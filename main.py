@@ -10,10 +10,19 @@ import calendar
 import os
 import time
 
+__version__ = '1.0.0'
+__changelogurl__ = 'https://git.admin.franklin.edu/tins/shorty/raw/branch/master/CHANGELOG'
+
+metainfo = {
+    'version': __version__,
+    'changelog': __changelogurl__,
+}
+
 # FIXME: This permissions setting shouldn't be forced here, but permissions is called from base, so it has to exist
 # This is defined globally so that it can be referenced in any function, local permissions var will override and
 # make it work for actual permissions
 permissions = {'id': None, 'admin': None, 'edit': None, 'keyword': None}
+
 
 def uri_validator(uri):
     """ Determines if a given URL is valid and returns True/False"""
@@ -187,9 +196,10 @@ def home():
                                    short_url=encoded_string,
                                    keyword=keyword,
                                    errors=errors,
+                                   metainfo=metainfo,
                                    permissions=permissions,
                                    )
-    return render_template('home.html', errors=errors, permissions=permissions)
+    return render_template('home.html', errors=errors, metainfo=metainfo, permissions=permissions)
 
 
 @app.route('/_help')
@@ -198,7 +208,7 @@ def showhelp():
     Displays the help page
     :return: jinja template for help.html
     """
-    return render_template('help.html', permissions=permissions)
+    return render_template('help.html', metainfo=metainfo, permissions=permissions)
 
 
 @app.route('/_logout')
@@ -222,13 +232,12 @@ def mylinks():
         success = request.args['editsuccess']
     except Exception as e:
         success = False
-    print(f'success is: {success}')
     with sqlite3.connect('urls.db') as conn:
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
         result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}'")
         results = [dict(row) for row in result_cursor.fetchall()]
-    return render_template('links.html', results=results, permissions=permissions, editsuccess=success)
+    return render_template('links.html', results=results, metainfo=metainfo, permissions=permissions, editsuccess=success)
 
 
 @app.route('/_edit', methods=['GET', 'POST'])
@@ -242,19 +251,21 @@ def edit_link():
         with sqlite3.connect('urls.db') as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}' and id = {recordid}")
+            result_cursor = cursor.execute(
+                f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}' and id = {recordid}")
             results = [dict(row) for row in result_cursor.fetchall()]
             try:
-                return render_template('edit.html', url=results[0]['url'], permissions=permissions)
+                return render_template('edit.html', url=results[0]['url'], metainfo=metainfo, permissions=permissions)
             except IndexError:
-                return render_template('edit.html', url='', permissions=permissions, errors=['No permission to edit this ID'])
+                return render_template('edit.html', url='', metainfo=metainfo, permissions=permissions,
+                                       errors=['No permission to edit this ID'])
     elif request.method == 'POST':
         with sqlite3.connect('urls.db') as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            cursor.execute(f"UPDATE redirect set url='{updateurl}' WHERE owner = '{g.ldap_username}' and id = '{request.args.get('id')}'")
+            cursor.execute(
+                f"UPDATE redirect set url='{updateurl}' WHERE owner = '{g.ldap_username}' and id = '{request.args.get('id')}'")
         return redirect(url_for('mylinks', editsuccess=True))
-
 
 
 @app.route('/<short_url>')
@@ -291,7 +302,7 @@ def redirect_short_url(short_url):
     try:
         return redirect(redirect_url)
     except UnboundLocalError:
-        return render_template('error.html', permissions=permissions, url=short_url)
+        return render_template('error.html', metainfo=metainfo, permissions=permissions, url=short_url)
 
 
 @app.template_filter('humantime')

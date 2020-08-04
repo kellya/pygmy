@@ -1,0 +1,16 @@
+1.0.0
+Initial "public" release.  The following features are implemented:
+    - Login with LDAP
+    - 3 different perimissions are available:
+        * admin
+        * edit (which everyone gets upon intitial login)
+        * keyword
+    - Basic URL shortening/redirect
+    - keyword (with permission) shortcuts
+    - viewing all links you have created
+    - Editing an existing link
+    - Basic reporting
+        * Date link is created
+        * Date link was last accessed
+        * Total hits for a link
+    - Help information
