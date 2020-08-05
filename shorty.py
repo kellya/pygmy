@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import importlib.metadata
 from flask import Flask, request, render_template, redirect, g, Response, url_for
 from flask_simpleldap import LDAP
 from urllib.parse import urlparse
@@ -9,12 +10,12 @@ import datetime
 import calendar
 import os
 import time
-from _version import __version__, __changelogurl__
 
+__version__ = importlib.metadata.version('shorty')
 
 metainfo = {
     'version': __version__,
-    'changelog': __changelogurl__,
+    'changelog': 'https://git.admin.franklin.edu/tins/shorty/raw/branch/master/ChangeLog'
 }
 
 # FIXME: This permissions setting shouldn't be forced here, but permissions is called from base, so it has to exist
@@ -84,7 +85,7 @@ app.config['LDAP_BASE_DN'] = os.environ['LDAP_BASE_DN']
 app.config['LDAP_USERNAME'] = os.environ['LDAP_USERNAME']
 app.config['LDAP_PASSWORD'] = os.environ['LDAP_PASSWORD']
 app.config['LDAP_OPENLDAP'] = True
-app.config['LDAP_USER_OBJECT_FILTER'] = os.environ['LDAP_USER_OBJECT_FILTER']
+app.config['LDAP_USER_OBJECT_FILTER'] = '(&(objectclass=inetOrgPerson)(uid=%s))'
 ldap = LDAP(app)
 
 
