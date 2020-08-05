@@ -1,3 +1,5 @@
 urls.db
 .idea
 environment
+.eggs
+__pycache__
