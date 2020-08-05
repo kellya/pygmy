@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import importlib.metadata
 from flask import Flask, request, render_template, redirect, g, Response, url_for
 from flask_simpleldap import LDAP
 from urllib.parse import urlparse
@@ -10,8 +9,6 @@ import datetime
 import calendar
 import os
 import time
-
-#For python 3.6 compatibility in production
 from pbr.version import VersionInfo
 
 __version__ = VersionInfo('shorty').release_string()
