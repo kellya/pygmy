@@ -9,9 +9,8 @@ import datetime
 import calendar
 import os
 import time
+from _version import __version__, __changelogurl__
 
-__version__ = '1.0.0'
-__changelogurl__ = 'https://git.admin.franklin.edu/tins/shorty/raw/branch/master/CHANGELOG'
 
 metainfo = {
     'version': __version__,
@@ -268,6 +267,11 @@ def edit_link():
         return redirect(url_for('mylinks', editsuccess=True))
 
 
+@app.route('/_admin')
+@ldap.basic_auth_required
+def admin():
+    permissions = get_permissions(g.ldap_username)
+    return render_template('admin.html', permissions=permissions, metainfo=metainfo)
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
     """

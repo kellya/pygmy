@@ -9,7 +9,7 @@
     {% block head %}
     {% endblock %}
 </head>
-<body>
+<body class="bg-muted">
     <nav class="navbar navbar-dark bg-dark navbar-fixed-top">
             <ul class="nav nav-pills nav-fill">
                 <li class="nav-item dropdown">
@@ -35,12 +35,14 @@
     {% block body %}
     {% endblock %}
     <footer>
-        <small>
+        {% block footer %}
+        {% endblock %}
+        <div class="fixed-bottom text-secondary">
+        <small class="pull-right">
             version:
-            <a title="View the changelog" href="{{ metainfo['changelog'] }}">{{ metainfo['version'] }}</a>
-                {% block footer %}
-                {% endblock %}
+            <a class="text-muted" title="View the changelog" href="{{ metainfo['changelog'] }}">{{ metainfo['version'] }}</a>
         </small>
+        </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
