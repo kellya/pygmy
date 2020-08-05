@@ -1,0 +1,47 @@
+CHANGES
+=======
+
+v1.0.0
+------
+
+* Added version info and offically tagging v1.0.0
+* Added help topics for edit and keyword, fixed ID decode for edit
+* Added edit template
+* Added rudimentary/messy edit functionality
+* cleanup pointless multiline strings
+* Workaround for permissions that are called for anonymous pages
+* Fixed spelling error on function name
+* Added descritive variable name for uri\_validator
+* PEP8 cleanup for variable names
+* prefix app urls with underscore, closes #4
+* Added rudimentary permissioning and converted all SQL to f-strings
+* added error detailed URL
+* Standardized camelCased db column names, added permission table
+* Fixed drop-down arrow color
+* Theming fix
+* Reworked menu into drop-down
+* added error handling
+* Added logout handling
+* Renamed virtualenv to match prod
+* Added args to filters for future options
+* Auto-add LDAP environment variables
+* Added links display and filtering to format dates
+* Added character validation for keyword and updated templates
+* Added host value for app.run
+* Pull ALL ldap values from environment
+* Reworked the theme for a navbar and moved to a base templated version
+* Fix annoying favicon error
+* Added 'unique' contraint to keyword
+* Fixed formatting
+* Doc update for features and requirements update
+* Added link validation and ldap auth
+* Removed host var and use requests.\* values instead.  Closes #1
+* Added initial readme
+* PEP8 Cleanup
+* Added requirements
+* Added requirements
+* Added help text
+* Added hitcount updater and keyword logic
+* Added dotfiles
+* Initial checkin
+* Initial commit
