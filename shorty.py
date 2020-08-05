@@ -11,7 +11,10 @@ import calendar
 import os
 import time
 
-__version__ = importlib.metadata.version('shorty')
+#For python 3.6 compatibility in production
+from pbr.version import VersionInfo
+
+__version__ = VersionInfo('shorty').release_string()
 
 metainfo = {
     'version': __version__,
