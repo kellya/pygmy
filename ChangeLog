@@ -1,6 +1,18 @@
 CHANGES
 =======
 
+* Removed the 3.8 import for metadata
+
+v1.0.1
+------
+
+* Fix version from pbr compat issue with python 3.6
+* WORKAROUND: hardcoded object filter.  Renamed to shorty.py
+* Moved to pbr-based changelog
+* reworked for pbr/setuptools
+* Added admin template stub
+* Ignore eggs
+
 v1.0.0
 ------
 
