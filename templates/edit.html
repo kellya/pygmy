@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Edit Shortcut{% endblock %}
+{% block body %}
+<div class="jumbotron">
+    <div class="container">
+        <br />
+        {% if not short_url %}
+            {% if errors|length > 0 %}
+                <div class="alert alert-warning" role="alert">
+                    <i class="nav-item fas fa-exclamation-triangle"></i>
+                {% for error in errors %}
+                    {{ error }}<br />
+                {% endfor %}
+                </div>
+            {% else %}
+                    <form method="post" class="navbar-form navbar-right" action="">
+                        <div class="form-group">
+                            <input type="text" id="url" name="url" class="form-control input-lg chat-input" value="{{ url }}" placeholder="URL to shorten" />
+                            <small id="urlhelp"  class="form-text text-muted">
+                                Enter the destination URL.
+                            </small>
+                            <br>
+                            <button type="submit" class="btn btn-lg btn-info">Submit</button>
+                        </div>
+                    </form>
+            {% endif %}
+        {% else %}
+            <div>
+                <p>
+                    Your shortened URL is: <a href="/{{ short_url }}"> {{ url_base }}/{{short_url}}</a>
+                </p>
+            </div>
+                {% if keyword %}
+                    <div>
+                        <p>
+                            You may also use your selected keyword: <a href="/{{ keyword }}"> {{ url_base }}/{{ keyword }}</a>
+                        </p>
+                    </div>
+                {% endif %}
+
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
