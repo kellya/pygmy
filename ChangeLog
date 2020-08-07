@@ -1,6 +1,7 @@
 CHANGES
 =======
 
+* Reworked directory structure for setuptools distribution
 * Updated 1.0.1
 * Removed the 3.8 import for metadata
 
