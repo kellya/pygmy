@@ -9,6 +9,7 @@ import datetime
 import calendar
 import os
 import time
+import pugsql
 from pbr.version import VersionInfo
 
 __version__ = VersionInfo('shorty').release_string()
@@ -18,10 +19,8 @@ metainfo = {
     'changelog': 'https://git.admin.franklin.edu/tins/shorty/raw/branch/master/ChangeLog'
 }
 
-# FIXME: This permissions setting shouldn't be forced here, but permissions is called from base, so it has to exist
-# This is defined globally so that it can be referenced in any function, local permissions var will override and
-# make it work for actual permissions
-permissions = {'id': None, 'admin': None, 'edit': None, 'keyword': None}
+queries = pugsql.module('sql/')
+queries.connect('sqlite:///urls.db')
 
 
 def uri_validator(uri):
@@ -37,33 +36,16 @@ def uri_validator(uri):
 
 def table_check():
     """Verify the tables exist in the db"""
-    create_redirect_table = """
-        CREATE TABLE "redirect"(
-        "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-        "url" TEXT NOT NULL,
-        "owner" TEXT DEFAULT 0,
-        "createTime" INTEGER,
-        "lastUsed" INTEGER,
-        "hit" INTEGER DEFAULT 0,
-        "keyword" TEXT UNIQUE
-        );
-        """
-    create_permission_table = """
-        CREATE TABLE "permission" (
-        "id"	TEXT NOT NULL UNIQUE,
-        "admin"	INTEGER,
-        "edit"	INTEGER,
-        "keyword"	INTEGER,
-        PRIMARY KEY("id")
-    );
-    """
-    with sqlite3.connect('urls.db') as conn:
-        cursor = conn.cursor()
-        try:
-            cursor.execute(create_redirect_table)
-            cursor.execute(create_permission_table)
-        except OperationalError:
-            pass
+    try:
+        queries.create_owner_table()
+        queries.create_namespace_table()
+        queries.create_permission_table()
+        queries.insert_default_permissions()
+        queries.create_namespacepermission_table()
+        queries.create_redirect_table()
+        queries.create_apppermission_table()
+    except Exception as e:
+        pass
 
 
 app = Flask(__name__)
@@ -98,33 +80,34 @@ def hit_increase(recordid):
     timestamp = calendar.timegm(datetime.datetime.now().timetuple())
     if type(recordid) == str:
         # We need to get the ID for the shortname/keyword
-        with sqlite3.connect('urls.db') as conn:
-            cursor = conn.cursor()
-            result_cursor = cursor.execute(f"SELECT id FROM redirect WHERE keyword = '{recordid}'")
-            recordid = result_cursor.fetchone()[0]
+        recordid = queries.get_record_by_keyword(keyword=recordid)['id']
 
-    with sqlite3.connect('urls.db') as conn:
-        cursor = conn.cursor()
-        update_sql = f'UPDATE redirect SET hit = hit + 1 WHERE id = {recordid}'
-        result_cursor = cursor.execute(update_sql)
+    queries.update_redirect_hits(lastUsed=timestamp, recordid=recordid)
 
-        update_sql = f'UPDATE redirect SET lastUsed = {timestamp} WHERE id = {recordid}'
-        cursor.execute(update_sql)
+
+def get_userid(username):
+    """
+    Returns the numeric ID of the username given or False if no user matches
+    :param username:
+    :return: int
+    """
+    try:
+        userid = queries.get_id_from_name(username=username)['id']
+        return userid
+    except Exception as e:
+        return False
 
 
 def set_default_permissions(username):
+    print(username)
     """
     Create a default permission set for a user if they are not already in the db
     :param username:UID from LDAP
     :return:  None
     """
-    insert_query = f"INSERT INTO permission (id, edit) values ('{username}', 1)"
-    with sqlite3.connect('urls.db') as conn:
-        cursor = conn.cursor()
-        try:
-            cursor.execute(insert_query)
-        except Exception as e:
-            print(e)
+    userid = get_userid(username)
+    queries.create_owner_entry(username=username)
+    queries.create_owner_default_permissions(owner=userid)
 
 
 def get_permissions(username):
@@ -133,17 +116,15 @@ def get_permissions(username):
     :param username: uid from LDAP
     :return: A dictionary containing permissions as returned from the DB
     """
-    return_query = f"SELECT * FROM permission WHERE id = '{username}'"
-    with sqlite3.connect('urls.db') as conn:
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        try:
-            result_cursor = cursor.execute(return_query)
-            results = [dict(row) for row in result_cursor.fetchall()]
-            return results[0]
-        except IndexError:
-            set_default_permissions(username)
-            get_permissions(username)
+    userid = get_userid(username)
+    permissions = []
+    if not userid:
+        # if we don't have a username from the db, it's a new user, so create it and call back
+        set_default_permissions(username)
+        get_permissions(username)
+    for permission in queries.get_user_permissions(owner=userid):
+        permissions.append(permission['name'])
+    return permissions
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -154,7 +135,12 @@ def home():
     :return:  jinja template for /home.html
     """
     errors = []
-    permissions = get_permissions(g.ldap_username)
+    # Set the username once so we don't have to keep querying it
+    username = g.ldap_username
+    # Get the numeric ID of teh user (maybe make it so we
+    userid = get_userid(username)
+    print(userid)
+    permissions = get_permissions(username)
     if request.method == 'POST':
         original_url = request.form.get('url')
         keyword = request.form.get('keyword')
@@ -163,34 +149,26 @@ def home():
         if not uri_validator(original_url):
             errors.append(f'URL {original_url} is not in the proper format')
         try:
-            if not keyword[0].isalnum():
-                errors.append(f'Keyword must start with an alphanumeric character')
+            if len(keyword) > 0 and not keyword.isalnum():
+                errors.append(f'Keyword must only contain alpha-numeric characters.')
         except IndexError:
             # If we weren't given a keyword, just pass
             pass
+        namespace = 1  # REMOVE AFTER NAMESPACES ARE WORKING!!!
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
-            with sqlite3.connect('urls.db') as conn:
-                cursor = conn.cursor()
-                if len(keyword) > 0:
-                    insert_row = f"""
-                        INSERT INTO redirect (url, owner, createTime, keyword)
-                        VALUES ('{original_url}', '{g.ldap_username}', '{timestamp}', '{keyword}')
-                    """
-                else:
-                    insert_row = f"""
-                        INSERT INTO redirect (url, owner, createTime)
-                            VALUES ('{original_url}', '{g.ldap_username}', '{timestamp}')
-                        """
-
-                try:
-                    result_cursor = cursor.execute(insert_row)
-                    encoded_string = "+" + base36.dumps(result_cursor.lastrowid)
-                except sqlite3.IntegrityError:
-                    errors.append(f'Keyword {keyword} is already used')
-                    encoded_string = ""
-                # Prepend the string with a + so we can differentiate between shortURL and custom Redirects
-                url_base = f'{request.scheme}://{request.host}' or None
+            if len(keyword) > 0:
+                lastrowid = queries.insert_redirect_keyword(
+                    url=original_url, owner=userid, createTime=timestamp, keyword=keyword, namespace=namespace
+                )
+            else:
+                lastrowid = queries.insert_redirect(
+                    url=original_url, owner=userid, createTime=timestamp, namespace=namespace
+                )
+            encoded_string = "+" + base36.dumps(lastrowid)
+            #ATODO: Add dupe checking for keywords in namespace
+            # Prepend the string with a + so we can differentiate between shortURL and custom Redirects
+            url_base = f'{request.scheme}://{request.host}' or None
             return render_template('home.html',
                                    url_base=url_base,
                                    short_url=encoded_string,
@@ -223,48 +201,39 @@ def logout():
 @app.route('/_mylinks', methods=['GET'])
 @ldap.basic_auth_required
 def mylinks():
+    username = g.ldap_username
     """
     Displays all the links created by the logged-in user
     :return: jinja template render for links.html
     """
-    permissions = get_permissions(g.ldap_username)
+    permissions = get_permissions(username)
     try:
         success = request.args['editsuccess']
     except Exception as e:
         success = False
-    with sqlite3.connect('urls.db') as conn:
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        result_cursor = cursor.execute(f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}'")
-        results = [dict(row) for row in result_cursor.fetchall()]
-    return render_template('links.html', results=results, metainfo=metainfo, permissions=permissions, editsuccess=success)
+    results = queries.get_shortcuts(owner=get_userid(username))
+    return render_template('links.html', results=results, metainfo=metainfo, permissions=permissions,
+                           editsuccess=success)
 
 
 @app.route('/_edit', methods=['GET', 'POST'])
 @ldap.basic_auth_required
 def edit_link():
+    username = g.ldap_username
     updateurl = request.form.get('url')
-    permissions = get_permissions(g.ldap_username)
+    permissions = get_permissions(username)
+    userid = get_userid(username)
 
     if request.method == 'GET':
         recordid = base36.loads(request.args.get('id'))
-        with sqlite3.connect('urls.db') as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            result_cursor = cursor.execute(
-                f"SELECT * FROM redirect WHERE owner = '{g.ldap_username}' and id = {recordid}")
-            results = [dict(row) for row in result_cursor.fetchall()]
-            try:
-                return render_template('edit.html', url=results[0]['url'], metainfo=metainfo, permissions=permissions)
-            except IndexError:
-                return render_template('edit.html', url='', metainfo=metainfo, permissions=permissions,
-                                       errors=['No permission to edit this ID'])
+        url = queries.get_record_by_id_with_owner(owner=userid, id=recordid)['url']
+        try:
+            return render_template('edit.html', url=url, metainfo=metainfo, permissions=permissions)
+        except IndexError:
+            return render_template('edit.html', url='', metainfo=metainfo, permissions=permissions,
+                                   errors=['No permission to edit this ID'])
     elif request.method == 'POST':
-        with sqlite3.connect('urls.db') as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute(
-                f"UPDATE redirect set url='{updateurl}' WHERE owner = '{g.ldap_username}' and id = '{request.args.get('id')}'")
+        queries.update_redirect(updateurl=updateurl, owner=userid, id=request.args.get('id'))
         return redirect(url_for('mylinks', editsuccess=True))
 
 
@@ -273,6 +242,18 @@ def edit_link():
 def admin():
     permissions = get_permissions(g.ldap_username)
     return render_template('admin.html', permissions=permissions, metainfo=metainfo)
+
+
+@app.route('/<namespace>/<keyword>')
+def redirect_name_keyword(namespace, keyword):
+    """
+    Name-based keywords so that users can create their own redirects that don't overwrite globals
+    :param namespace:
+    :param keyword:
+    :return:
+    """
+    return "This function not yet complete"
+
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
     """
@@ -284,29 +265,18 @@ def redirect_short_url(short_url):
     short_url = short_url.lower()
     if short_url[0] == "+":
         decoded_string = base36.loads(short_url)
-        redirect_url = request.host
-        with sqlite3.connect('urls.db') as conn:
-            cursor = conn.cursor()
-            select_row = f"SELECT url FROM redirect WHERE id={decoded_string}"
-            result_cursor = cursor.execute(select_row)
-            try:
-                redirect_url = result_cursor.fetchone()[0]
-                hit_increase(decoded_string)
-            except Exception as e:
-                print(e)
+        try:
+            redirect_url = queries.get_redirect_url(id=decoded_string)['url']
+            hit_increase(decoded_string)
+        except Exception as e:
+            print(e)
     else:
-        with sqlite3.connect('urls.db') as conn:
-            cursor = conn.cursor()
-            select_row = f"SELECT url FROM redirect WHERE keyword = '{short_url}';"
-            result_cursor = cursor.execute(select_row)
-            try:
-                redirect_url = result_cursor.fetchone()[0]
-                hit_increase(short_url)
-            except Exception as e:
-                print(e)
+        redirect_url = queries.get_redirect_keyword(keyword=short_url)['url']
+        hit_increase(short_url)
     try:
         return redirect(redirect_url)
-    except UnboundLocalError:
+    except Exception as e:
+        permissions = []
         return render_template('error.html', metainfo=metainfo, permissions=permissions, url=short_url)
 
 

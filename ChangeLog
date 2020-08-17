@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+v1.0.2
+------
+
+* Added wsgi file from prod to repo
+* Git missed the mv of files
+* Reworked directory structure again
 * Reworked directory structure for setuptools distribution
 * Updated 1.0.1
 * Removed the 3.8 import for metadata

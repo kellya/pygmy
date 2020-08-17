@@ -18,7 +18,7 @@
                     <div class="dropdown-menu bg-dark">
                         <a class="dropdown-item text-light" href="/_help"><i class="nav-item fas fa-question-circle"></i> Help</a>
                         <a class="dropdown-item text-light" href="https://git.admin.franklin.edu/tins/shorty/issues" title="Report issues or request features"><i class="nav-item fas fa-bug"></i> Issues</a>
-                        {% if permissions['admin'] %}
+                        {% if 'admin' in permissions %}
                             <a class="dropdown-item text-light" href="/_admin" title="Administrative features"><i class="nav-item fas fa-user-shield"></i> Administration</a>
                         {% endif %}
                         <div class="dropdown-divider"></div>
