@@ -22,6 +22,12 @@
                                 Enter the destination URL.
                             </small>
                             {% if ('admin' in permissions or 'keyword' in permissions) %}
+                                 <label for="namespace">Choose a namespace:</label>
+                                <select name="namespace" id="namespace">
+                                {% for row in ns_permissions %}
+                                    <option title="{{ row['description'] }}" value="{{ row['id'] }}" {% if (row['namespace'] == 'user') %}Selected{% endif %}>{{ row['namespace'].title() }}</option>
+                                {% endfor %}
+                                </select>
                             <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
                             <small id="keyhelp" class="form-text text-muted">
                                To make a URL like {{ url_base }}/keyword
@@ -42,7 +48,7 @@
                 {% if keyword %}
                     <div>
                         <p>
-                            You may also use your selected keyword: <a href="/{{ keyword }}"> {{ url_base }}/{{ keyword }}</a>
+                            You may also use your selected keyword: <a href="{{ keyword_url }}">{{ keyword_url }}</a>
                         </p>
                     </div>
                 {% endif %}

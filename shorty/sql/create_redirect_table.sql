@@ -7,7 +7,7 @@
         "lastUsed" INTEGER,
         "hit" INTEGER DEFAULT 0,
         "namespace" INTEGER NOT NULL,
-        "keyword" TEXT UNIQUE,
+        "keyword" TEXT,
         FOREIGN KEY(owner) REFERENCES owner(id),
         FOREIGN KEY(namespace) REFERENCES namespace(id)
         );

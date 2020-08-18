@@ -128,6 +128,38 @@ def get_permissions(username):
     return permissions
 
 
+def get_namespace_permissions(username):
+    """
+    Returns a dictionary of namespaces to which the specified username has access
+    :param username:
+    :return:
+    """
+    userid = get_userid(username)
+    retval = []
+    for row in queries.get_namespace_permissions(owner=userid):
+        retval.append(row)
+    return retval
+
+
+def get_uri_path(namespaceid, keyword, username=None):
+    namespace = queries.get_namespace_by_id(id=namespaceid)['name']
+
+    reserved_names = {
+        'user': username,
+        'global': '/'
+    }
+    if not namespace.lower() in reserved_names:
+        return f'/{namespace.lower()}/{keyword.lower()}'
+    elif namespace.lower() == 'global':
+        return f'/{keyword}'
+    elif namespace == 'user' and keyword:
+        return f'/{username.lower()}/{keyword}'
+    elif namespace == 'user' and not username:
+        return False, "Username must be specified with user namespace"
+    else:
+        return False, "There was an error processing this url"
+
+
 @app.route('/', methods=['GET', 'POST'])
 @ldap.basic_auth_required
 def home():
@@ -142,6 +174,7 @@ def home():
     userid = get_userid(username)
     print(userid)
     permissions = get_permissions(username)
+    ns_permissions = get_namespace_permissions(username)
     if request.method == 'POST':
         original_url = request.form.get('url')
         keyword = request.form.get('keyword')
@@ -155,7 +188,9 @@ def home():
         except IndexError:
             # If we weren't given a keyword, just pass
             pass
-        namespace = 1  # REMOVE AFTER NAMESPACES ARE WORKING!!!
+        namespace = request.form.get('namespace')
+        if not queries.search_keyword(owner=userid, namespace=namespace, keyword=keyword)['count'] == 0:
+            errors.append(f'Keyword {keyword} is not unique in specified namespace')
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
             if len(keyword) > 0:
@@ -167,9 +202,9 @@ def home():
                     url=original_url, owner=userid, createTime=timestamp, namespace=namespace
                 )
             encoded_string = "+" + base36.dumps(lastrowid)
-            #ATODO: Add dupe checking for keywords in namespace
             # Prepend the string with a + so we can differentiate between shortURL and custom Redirects
             url_base = f'{request.scheme}://{request.host}' or None
+            keyword_url = url_base + get_uri_path(namespace, keyword, username)
             return render_template('home.html',
                                    url_base=url_base,
                                    short_url=encoded_string,
@@ -177,8 +212,10 @@ def home():
                                    errors=errors,
                                    metainfo=metainfo,
                                    permissions=permissions,
+                                   ns_permissions=ns_permissions,
+                                   keyword_url = keyword_url,
                                    )
-    return render_template('home.html', errors=errors, metainfo=metainfo, permissions=permissions)
+    return render_template('home.html', errors=errors, metainfo=metainfo, permissions=permissions, ns_permissions=ns_permissions)
 
 
 @app.route('/_help')
