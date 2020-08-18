@@ -1,2 +1,3 @@
 -- :name get_shortcuts :many
-SELECT * FROM redirect WHERE owner = :owner
+SELECT redirect.*, namespace.name as namespace_name FROM redirect, namespace WHERE owner = :owner and namespace=namespace.id
+ORDER BY namespace_name
