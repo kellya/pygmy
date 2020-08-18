@@ -153,7 +153,7 @@ def get_uri_path(namespaceid, keyword, username=None):
     elif namespace.lower() == 'global':
         return f'/{keyword}'
     elif namespace == 'user' and keyword:
-        return f'/{username.lower()}/{keyword}'
+        return f'/~{username.lower()}/{keyword}'
     elif namespace == 'user' and not username:
         return False, "Username must be specified with user namespace"
     else:
@@ -290,7 +290,22 @@ def redirect_name_keyword(namespace, keyword):
     :param keyword:
     :return:
     """
-    return "This function not yet complete"
+    errors = []
+    if not namespace[0] == '~':
+        namespace = queries.get_namespace_id_by_name(name=namespace)['id']
+        redirect_url = queries.get_namespace_redirect(namespace=namespace, keyword=keyword)
+
+    else:
+        ownerid = get_userid(namespace[1:])
+        redirect_url = queries.get_user_namespace_redirect(owner=ownerid, keyword=keyword)
+
+    if redirect_url:
+        redirect_url = redirect_url['url']
+    else:
+        return "The shortlink specified is invalid"
+
+    return redirect(redirect_url)
+
 
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
