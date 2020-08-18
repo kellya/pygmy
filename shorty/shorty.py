@@ -44,6 +44,7 @@ def table_check():
         queries.create_namespacepermission_table()
         queries.create_redirect_table()
         queries.create_apppermission_table()
+        queries.insert_default_namespaces()
     except Exception as e:
         pass
 
@@ -105,8 +106,8 @@ def set_default_permissions(username):
     :param username:UID from LDAP
     :return:  None
     """
-    userid = get_userid(username)
     queries.create_owner_entry(username=username)
+    userid = get_userid(username)
     queries.create_owner_default_permissions(owner=userid)
 
 
