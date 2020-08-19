@@ -81,7 +81,7 @@ def hit_increase(recordid, namespace=1):
     timestamp = calendar.timegm(datetime.datetime.now().timetuple())
     if type(recordid) == str:
         # We need to get the ID for the shortname/keyword
-        recordid = queries.get_record_by_keyword(keyword=recordid,namespace=namespace)['id']
+        recordid = queries.get_record_by_keyword(keyword=recordid, namespace=namespace)['id']
 
     queries.update_redirect_hits(lastUsed=timestamp, recordid=recordid)
 
@@ -306,6 +306,7 @@ def redirect_name_keyword(namespace, keyword):
     errors = []
     if not namespace[0] == '~':
         namespace = queries.get_namespace_id_by_name(name=namespace)['id']
+        hit_increase(keyword, 2)
         redirect_url = queries.get_namespace_redirect(namespace=namespace, keyword=keyword)
 
     else:
@@ -337,8 +338,8 @@ def redirect_short_url(short_url):
         except Exception as e:
             print(e)
     else:
-        redirect_url = queries.get_redirect_keyword(keyword=short_url)['url']
-        hit_increase(short_url)
+        redirect_url = queries.get_redirect_keyword_ns(keyword=short_url, namespace=2)['url']
+        hit_increase(short_url,namespace=2)
     try:
         return redirect(redirect_url)
     except Exception as e:
