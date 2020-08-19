@@ -3,16 +3,22 @@ Overview
 
 This is a URL shortening service that works like any typical URL shortening
 service, except that it also allows you to specify a keyword as a URL in
-addition to the "random" short link
+addition to the "random" short link and has the concept of namespaces so that 
+people can create their own custom keywords and not overlap with global ones whose
+access is more restricted.
 
 Features
 ========
 
 * Create a shortend URL from any URL entered
-* Reporting (Hit count is updated, but actual report is planned)
+* Reporting (Total hits, last used, created)
 * Link time tracking (tracks create date and last time it was hit)
 * External Authentication
-* Multi-user (partially implemented)
+* Multi-user
+* Namespaces
+    * Namespaces for keywords (global and user by default, custom ones may be added)
+    * Permissions for namespaces
+* Database abstraction through pugsql (though everything was developed and tested solely on SQLite)
 
 Methodology
 ===========
