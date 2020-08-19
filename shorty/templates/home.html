@@ -2,7 +2,7 @@
 {% block title %}Franklin URL Shortening{% endblock %}
 {% block body %}
 <div class="jumbotron">
-    <div class="container">
+    <div class="container-fluid">
         <br />
         {% if not short_url %}
             {% if errors|length > 0 %}
@@ -13,33 +13,34 @@
                 {% endfor %}
                 </div>
             {% endif %}
-            <div class="row">
-                <div class="col-md-offset-3 col-md-3">
-                    <form method="post" class="navbar-form navbar-right" action="">
-                        <div class="form-group">
-                            <input type="text" id="url" name="url" class="form-control input-lg chat-input" placeholder="URL to shorten" />
-                            <small id="urlhelp" class="form-text text-muted">
-                                Enter the destination URL.
-                            </small>
-                            {% if ('admin' in permissions or 'keyword' in permissions) %}
-                                 <label for="namespace">Choose a namespace:</label>
-                                <select name="namespace" id="namespace">
-                                {% for row in ns_permissions %}
-                                    <option title="{{ row['description'] }}" value="{{ row['id'] }}" {% if (row['namespace'] == 'user') %}Selected{% endif %}>{{ row['namespace'].title() }}</option>
-                                {% endfor %}
-                                </select>
-                            <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
-                            <small id="keyhelp" class="form-text text-muted">
-                               To make a URL like {{ url_base }}/keyword
-                            </small>
-                                {% endif %}
-                            <br>
-                            <button type="submit" class="btn btn-lg btn-info">Submit</button>
-                        </div>
-                    </form>
+            <form method="post" class="navbar-form navbar-right" action="">
+                <div class="form-group container-lg">
+                    <div class="container-lg bg-primary border">
+                        &nbsp;
+                        <input type="text" id="url" name="url" class="form-control input-lg chat-input" placeholder="URL to shorten" />
+                        <small id="urlhelp" class="form-text text-light">
+                            Enter the destination URL.
+                        </small>
+                        {% if ('admin' in permissions or 'keyword' in permissions) %}
+                    </div>
+                    <div class="container-lg bg-light border">
+                        <label for="namespace">Namespace:</label>
+                        <select name="namespace" id="namespace">
+                            {% for row in ns_permissions %}
+                            <option title="{{ row['description'] }}" value="{{ row['id'] }}" {% if (row['namespace'] == 'user') %}Selected{% endif %}>{{ row['namespace'].title() }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
+                        <small id="keyhelp" class="form-text text-muted">
+                            To make a URL like {{ url_base }}/keyword
+                        </small>
+                    </div>
+                    {% endif %}
+                    <br/>
+                    <button type="submit" class="btn btn-lg btn-info">Submit</button>
                 </div>
-            </div>
-        {% else %}
+            </form>
+    {% else %}
             <div>
                 <p>
                     Your shortened URL is: <a href="/{{ short_url }}"> {{ url_base }}/{{short_url}}</a>

@@ -53,15 +53,19 @@
             Note: /keyword shortcuts are global.  If you want a <em>testing</em> keyword, but that keyword is already in use,
                 you will get an error
             </div>
-        <h3>Wait a minute...I don't see a keyword option</h3>
-            <p>Since the keywords are global, this is a special permission that must be added to your account.  Please contact
-            the helpdesk to open a ticket to request this access.</p>
+        <h3> What's a Namespace?</h3>
+        <p>Namespaces are a way to isolate keywords so that you ultimately increase the number of keywords people may use
+            as the same keywords in different namespaces do not overlap.</p>
+        <p>There are two default namespaces: global, and user.  Global are keywrods directly at the root of the domain
+            so a path like {{ url_base }}/shortcut.  The user namespace matches your own username and is prefixed with a tilde (~).
+            Those urls would look something like {{ url_base }}/~username/shortcut</p>
         <h2>Editing a destination URL</h2>
             <p>
                 You are able to edit the destination URL for any link which you have added from the <a href="{{ url_for('mylinks') }}"> My Shortcuts</a> Page.
                 From that page, click on the edit icon in the "Actions" column and enter the new URL you wish the shortlink/keyword to target.
             </p>
-    <h3>Can I change a a shortlink ID or keyword?</h3>
+
+    <h3>Can I change a shortlink ID or keyword?</h3>
         <p>No, you may only change the destination URL.  The shortlinks are always assumed to go to a valid endpoint once the are created, so you are able to change the endpoint, but not the source</p>
     <h3>Can I delete a link?</h3>
         <p>Well even though I just said "shortlinks are always assumed to go to a valid endpoint once they are created", there is planned functionality to delete shortcuts.</p>

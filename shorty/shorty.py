@@ -237,7 +237,8 @@ def showhelp():
     Displays the help page
     :return: jinja template for help.html
     """
-    return render_template('help.html', metainfo=metainfo, permissions=permissions)
+    url_base = f'{request.scheme}://{request.host}' or None
+    return render_template('help.html', url_base=url_base, metainfo=metainfo, permissions=[])
 
 
 @app.route('/_logout')
@@ -339,7 +340,7 @@ def redirect_short_url(short_url):
             print(e)
     else:
         redirect_url = queries.get_redirect_keyword_ns(keyword=short_url, namespace=2)['url']
-        hit_increase(short_url,namespace=2)
+        hit_increase(short_url, namespace=2)
     try:
         return redirect(redirect_url)
     except Exception as e:
