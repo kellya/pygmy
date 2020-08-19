@@ -72,7 +72,7 @@ app.config['LDAP_USER_OBJECT_FILTER'] = '(&(objectclass=inetOrgPerson)(uid=%s))'
 ldap = LDAP(app)
 
 
-def hit_increase(recordid):
+def hit_increase(recordid, namespace=1):
     """
     Updates the hit count and last used timestamp for recordid
     :param recordid: int or string specifying a unique record
@@ -81,7 +81,7 @@ def hit_increase(recordid):
     timestamp = calendar.timegm(datetime.datetime.now().timetuple())
     if type(recordid) == str:
         # We need to get the ID for the shortname/keyword
-        recordid = queries.get_record_by_keyword(keyword=recordid)['id']
+        recordid = queries.get_record_by_keyword(keyword=recordid,namespace=namespace)['id']
 
     queries.update_redirect_hits(lastUsed=timestamp, recordid=recordid)
 
@@ -109,6 +109,7 @@ def set_default_permissions(username):
     queries.create_owner_entry(username=username)
     userid = get_userid(username)
     queries.create_owner_default_permissions(owner=userid)
+    queries.create_user_space_default_permissions(owner=userid)
 
 
 def get_permissions(username):
@@ -172,7 +173,6 @@ def home():
     username = g.ldap_username
     # Get the numeric ID of teh user (maybe make it so we
     userid = get_userid(username)
-    print(userid)
     permissions = get_permissions(username)
     ns_permissions = get_namespace_permissions(username)
     if request.method == 'POST':
@@ -185,15 +185,25 @@ def home():
         try:
             if len(keyword) > 0 and not keyword.isalnum():
                 errors.append(f'Keyword must only contain alpha-numeric characters.')
-        except IndexError:
+        except TypeError:
             # If we weren't given a keyword, just pass
             pass
-        namespace = request.form.get('namespace')
+        if request.form.get('namespace'):
+            namespace = request.form.get('namespace')
+        else:
+            namespace = 2
         if not queries.search_keyword(owner=userid, namespace=namespace, keyword=keyword)['count'] == 0:
             errors.append(f'Keyword {keyword} is not unique in specified namespace')
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
-            if len(keyword) > 0:
+            try:
+                if len(keyword) > 0:
+                    haskeyword = True
+                else:
+                    haskeyword = False
+            except TypeError:
+                haskeyword = False
+            if haskeyword:
                 lastrowid = queries.insert_redirect_keyword(
                     url=original_url, owner=userid, createTime=timestamp, keyword=keyword, namespace=namespace
                 )
@@ -204,7 +214,10 @@ def home():
             encoded_string = "+" + base36.dumps(lastrowid)
             # Prepend the string with a + so we can differentiate between shortURL and custom Redirects
             url_base = f'{request.scheme}://{request.host}' or None
-            keyword_url = url_base + get_uri_path(namespace, keyword, username)
+            if haskeyword:
+                keyword_url = url_base + get_uri_path(namespace, keyword, username)
+            else:
+                keyword_url = None
             return render_template('home.html',
                                    url_base=url_base,
                                    short_url=encoded_string,
