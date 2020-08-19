@@ -307,7 +307,7 @@ def redirect_name_keyword(namespace, keyword):
     errors = []
     if not namespace[0] == '~':
         namespace = queries.get_namespace_id_by_name(name=namespace)['id']
-        hit_increase(keyword, 2)
+        hit_increase(keyword, namespace)
         redirect_url = queries.get_namespace_redirect(namespace=namespace, keyword=keyword)
 
     else:
