@@ -15,15 +15,15 @@
             {% endif %}
             <form method="post" class="navbar-form navbar-right" action="">
                 <div class="form-group container-lg">
-                    <div class="container-lg bg-primary border">
+                    <div class="container-lg bg-light border">
                         &nbsp;
                         <input type="text" id="url" name="url" class="form-control input-lg chat-input" placeholder="URL to shorten" />
-                        <small id="urlhelp" class="form-text text-light">
+                        <small id="urlhelp" class="form-text text-dark">
                             Enter the destination URL.
                         </small>
                         {% if ('admin' in permissions or 'keyword' in permissions) %}
                     </div>
-                    <div class="container-lg bg-light border">
+                    <div class="container-lg bg-dark text-white border">
                         <label for="namespace">Namespace:</label>
                         <select name="namespace" id="namespace">
                             {% for row in ns_permissions %}
@@ -31,7 +31,7 @@
                             {% endfor %}
                         </select>
                         <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
-                        <small id="keyhelp" class="form-text text-muted">
+                        <small id="keyhelp" class="form-text text-light">
                             To make a URL like {{ url_base }}/keyword
                         </small>
                     </div>
