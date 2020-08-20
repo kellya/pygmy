@@ -20,7 +20,7 @@ from pbr.version import VersionInfo
 
 __version__ = VersionInfo('shorty').release_string()
 
-metainfo = {
+meta_info = {
     'version': __version__,
     'changelog': 'https://git.admin.franklin.edu/tins/shorty/raw/branch'
                  '/master/ChangeLog '
@@ -98,20 +98,20 @@ app.config['LDAP_USER_OBJECT_FILTER'] = config['ldap']['user_object_filter']
 ldap = LDAP(app)
 
 
-def hit_increase(recordid, namespace=1):
+def hit_increase(record_id, namespace=1):
     """
-    Updates the hit count and last used timestamp for recordid
-    :param recordid: int or string specifying a unique record
+    Updates the hit count and last used timestamp for record_id
+    :param record_id: int or string specifying a unique record
     :param namespace: int representing the namespace id
     :return: None
     """
     timestamp = calendar.timegm(datetime.datetime.now().timetuple())
-    if type(recordid) == str:
+    if type(record_id) == str:
         # We need to get the ID for the shortname/keyword
-        recordid = queries.get_record_by_keyword(keyword=recordid,
-                                                 namespace=namespace)['id']
+        record_id = queries.get_record_by_keyword(keyword=record_id,
+                                                  namespace=namespace)['id']
 
-    queries.update_redirect_hits(lastUsed=timestamp, recordid=recordid)
+    queries.update_redirect_hits(lastUsed=timestamp, recordid=record_id)
 
 
 def get_userid(username):
@@ -166,14 +166,14 @@ def get_namespace_permissions(username):
     :return:
     """
     userid = get_userid(username)
-    retval = []
+    return_val = []
     for row in queries.get_namespace_permissions(owner=userid):
-        retval.append(row)
-    return retval
+        return_val.append(row)
+    return return_val
 
 
-def get_uri_path(namespaceid, keyword, username=None):
-    namespace = queries.get_namespace_by_id(id=namespaceid)['name']
+def get_uri_path(namespace_id, keyword, username=None):
+    namespace = queries.get_namespace_by_id(id=namespace_id)['name']
 
     reserved_names = {
         'user': username,
@@ -221,12 +221,12 @@ def home():
             pass
         try:
             if len(keyword) > 0:
-                haskeyword = True
+                has_keyword = True
             else:
-                haskeyword = False
+                has_keyword = False
         except TypeError:
-            haskeyword = False
-        if request.form.get('namespace') and haskeyword:
+            has_keyword = False
+        if request.form.get('namespace') and has_keyword:
             namespace = request.form.get('namespace')
         else:
             namespace = 2
@@ -236,8 +236,8 @@ def home():
                           'namespace')
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
-            if haskeyword:
-                lastrowid = queries.insert_redirect_keyword(
+            if has_keyword:
+                last_row_id = queries.insert_redirect_keyword(
                     url=original_url,
                     owner=userid,
                     createTime=timestamp,
@@ -245,17 +245,17 @@ def home():
                     namespace=namespace,
                 )
             else:
-                lastrowid = queries.insert_redirect(
+                last_row_id = queries.insert_redirect(
                     url=original_url,
                     owner=userid,
                     createTime=timestamp,
                     namespace=namespace
                 )
-            encoded_string = "+" + base36.dumps(lastrowid)
+            encoded_string = "+" + base36.dumps(last_row_id)
             # Prepend the string with a + so we can differentiate between
             # shortURL and custom Redirects
             url_base = f'{request.scheme}://{request.host}' or None
-            if haskeyword:
+            if has_keyword:
                 keyword_url = url_base + get_uri_path(
                     namespace,
                     keyword,
@@ -268,7 +268,7 @@ def home():
                                    short_url=encoded_string,
                                    keyword=keyword,
                                    errors=errors,
-                                   metainfo=metainfo,
+                                   metainfo=meta_info,
                                    permissions=permissions,
                                    ns_permissions=ns_permissions,
                                    keyword_url=keyword_url,
@@ -276,14 +276,14 @@ def home():
     return render_template(
         'home.html',
         errors=errors,
-        metainfo=metainfo,
+        metainfo=meta_info,
         permissions=permissions,
         ns_permissions=ns_permissions
     )
 
 
 @app.route('/_help')
-def showhelp():
+def show_help():
     """
     Displays the help page
     :return: jinja template for help.html
@@ -292,7 +292,7 @@ def showhelp():
     return render_template(
         'help.html',
         url_base=url_base,
-        metainfo=metainfo,
+        metainfo=meta_info,
         permissions=[]
     )
 
@@ -313,7 +313,7 @@ def logout():
 
 @app.route('/_mylinks', methods=['GET'])
 @ldap.basic_auth_required
-def mylinks():
+def my_links():
     username = g.ldap_username
     """
     Displays all the links created by the logged-in user
@@ -328,7 +328,7 @@ def mylinks():
     return render_template(
         'links.html',
         results=results,
-        metainfo=metainfo,
+        metainfo=meta_info,
         permissions=permissions,
         username=username,
         editsuccess=success
@@ -348,16 +348,16 @@ def edit_link():
         url = queries.get_record_by_id_with_owner(owner=userid,
                                                   id=recordid)['url']
         try:
-            return render_template('edit.html', url=url, metainfo=metainfo,
+            return render_template('edit.html', url=url, metainfo=meta_info,
                                    permissions=permissions)
         except IndexError:
-            return render_template('edit.html', url='', metainfo=metainfo,
+            return render_template('edit.html', url='', metainfo=meta_info,
                                    permissions=permissions,
                                    errors=['No permission to edit this ID'])
     elif request.method == 'POST':
         queries.update_redirect(updateurl=updateurl, owner=userid,
                                 id=request.args.get('id'))
-        return redirect(url_for('mylinks', editsuccess=True))
+        return redirect(url_for('my_links', editsuccess=True))
 
 
 @app.route('/_admin')
@@ -367,7 +367,7 @@ def admin():
     return render_template(
         'admin.html',
         permissions=permissions,
-        metainfo=metainfo
+        metainfo=meta_info
     )
 
 
@@ -412,6 +412,7 @@ def redirect_short_url(short_url):
     :return:
     """
     short_url = short_url.lower()
+    redirect_url = ""
     if short_url[0] == "+":
         decoded_string = base36.loads(short_url)
         try:
@@ -430,7 +431,7 @@ def redirect_short_url(short_url):
         permissions = []
         return render_template(
             'error.html',
-            metainfo=metainfo,
+            metainfo=meta_info,
             permissions=permissions,
             url=short_url
         )
