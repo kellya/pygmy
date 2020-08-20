@@ -1,13 +1,18 @@
 #!/usr/bin/env python
-from flask import Flask, request, render_template, redirect, g, Response, url_for
+from flask import (
+    Flask,
+    request,
+    render_template,
+    redirect,
+    g,
+    Response,
+    url_for
+)
 from flask_simpleldap import LDAP
 from urllib.parse import urlparse
-from sqlite3 import OperationalError
-import sqlite3
 import base36
 import datetime
 import calendar
-import os
 import time
 import pugsql
 import yaml
@@ -21,7 +26,6 @@ metainfo = {
 }
 
 
-
 def get_config(configfile):
     try:
         with open(configfile, 'r') as config_file:
@@ -33,6 +37,7 @@ def get_config(configfile):
         config_data = config_entries
         return config_data
 
+
 def uri_validator(uri):
     """ Determines if a given URL is valid and returns True/False"""
     # This code was obtained from a stackoverflow answer at:
@@ -40,7 +45,7 @@ def uri_validator(uri):
     try:
         result = urlparse(uri)
         return all([result.scheme, result.netloc, result.path])
-    except:
+    except Exception:
         return False
 
 
@@ -116,7 +121,7 @@ def get_userid(username):
     try:
         userid = queries.get_id_from_name(username=username)['id']
         return userid
-    except Exception as e:
+    except Exception:
         return False
 
 
@@ -184,8 +189,6 @@ def get_uri_path(namespaceid, keyword, username=None):
         return False, "There was an error processing this url"
 
 
-
-
 @app.route('/', methods=['GET', 'POST'])
 @ldap.basic_auth_required
 def home():
@@ -209,7 +212,7 @@ def home():
             errors.append(f'URL {original_url} is not in the proper format')
         try:
             if len(keyword) > 0 and not keyword.isalnum():
-                errors.append(f'Keyword must only contain alpha-numeric characters.')
+                errors.append('Keyword must only contain alpha-numeric characters.')
         except TypeError:
             # If we weren't given a keyword, just pass
             pass
@@ -264,7 +267,7 @@ def home():
                                    metainfo=metainfo,
                                    permissions=permissions,
                                    ns_permissions=ns_permissions,
-                                   keyword_url = keyword_url,
+                                   keyword_url=keyword_url,
                                    )
     return render_template(
         'home.html',
@@ -313,7 +316,7 @@ def mylinks():
     permissions = get_permissions(username)
     try:
         success = request.args['editsuccess']
-    except Exception as e:
+    except Exception:
         success = False
     results = queries.get_shortcuts(owner=get_userid(username))
     return render_template(
@@ -370,7 +373,6 @@ def redirect_name_keyword(namespace, keyword):
     :param keyword:
     :return:
     """
-    errors = []
     if not namespace[0] == '~':
         namespace = queries.get_namespace_id_by_name(name=namespace)['id']
         hit_increase(keyword, namespace)
@@ -416,7 +418,7 @@ def redirect_short_url(short_url):
         hit_increase(short_url, namespace=1)
     try:
         return redirect(redirect_url)
-    except Exception as e:
+    except Exception:
         permissions = []
         return render_template(
             'error.html',
