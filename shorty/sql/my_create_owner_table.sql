@@ -2,5 +2,5 @@
         CREATE TABLE owner(
         id INTEGER PRIMARY KEY AUTO_INCREMENT,
         username varchar(25) NOT NULL UNIQUE,
-        "email" varchar(255)
+        email varchar(255)
         );

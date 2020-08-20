@@ -10,6 +10,7 @@ import calendar
 import os
 import time
 import pugsql
+import yaml
 from pbr.version import VersionInfo
 
 __version__ = VersionInfo('shorty').release_string()
@@ -19,9 +20,18 @@ metainfo = {
     'changelog': 'https://git.admin.franklin.edu/tins/shorty/raw/branch/master/ChangeLog'
 }
 
-queries = pugsql.module('sql/')
-queries.connect('sqlite:///urls.db')
 
+
+def get_config(configfile):
+    try:
+        with open(configfile, 'r') as config_file:
+            config_entries = yaml.safe_load(config_file)
+    except FileNotFoundError as error:
+        print(error)
+        return False
+    else:
+        config_data = config_entries
+        return config_data
 
 def uri_validator(uri):
     """ Determines if a given URL is valid and returns True/False"""
@@ -37,19 +47,33 @@ def uri_validator(uri):
 def table_check():
     """Verify the tables exist in the db"""
     try:
-        queries.create_owner_table()
-        queries.create_namespace_table()
-        queries.create_permission_table()
+        if config['db']['string'].startswith('sqlite'):
+            queries.create_owner_table()
+            queries.create_namespace_table()
+            queries.create_permission_table()
+            queries.create_namespacepermission_table()
+            queries.create_redirect_table()
+            queries.create_apppermission_table()
+        elif config['db']['string'].startswith('mysql'):
+            print('we have mysql config')
+            queries.my_create_owner_table()
+            queries.my_create_namespace_table()
+            queries.my_create_permission_table()
+            queries.my_create_namespacepermission_table()
+            queries.my_create_apppermission_table()
+            queries.my_create_redirect_table()
         queries.insert_default_permissions()
-        queries.create_namespacepermission_table()
-        queries.create_redirect_table()
-        queries.create_apppermission_table()
         queries.insert_default_namespaces()
     except Exception as e:
+        print(e)
         pass
 
 
 app = Flask(__name__)
+config = get_config('/home/kellya/projects/shorty/conf/conf.yaml')
+queries = pugsql.module('sql/')
+queries.connect(config['db']['string'])
+
 ldap_vars = [
     'LDAP_HOST',
     'LDAP_BASE_DN',
@@ -58,17 +82,13 @@ ldap_vars = [
     'LDAP_REALM_NAME',
     'LDAP_USER_OBJECT_FILTER',
 ]
-for var in ldap_vars:
-    if var not in os.environ:
-        raise EnvironmentError(f'{var} must be exported as an environment variable\n\t \'export {var}="value"\'')
-
-app.config['LDAP_REALM_NAME'] = os.environ['LDAP_REALM_NAME']
-app.config['LDAP_HOST'] = os.environ['LDAP_HOST']
-app.config['LDAP_BASE_DN'] = os.environ['LDAP_BASE_DN']
-app.config['LDAP_USERNAME'] = os.environ['LDAP_USERNAME']
-app.config['LDAP_PASSWORD'] = os.environ['LDAP_PASSWORD']
+app.config['LDAP_REALM_NAME'] = config['ldap']['realm_name']
+app.config['LDAP_HOST'] = config['ldap']['host']
+app.config['LDAP_BASE_DN'] = config['ldap']['base_dn']
+app.config['LDAP_USERNAME'] = config['ldap']['username']
+app.config['LDAP_PASSWORD'] = config['ldap']['password']
 app.config['LDAP_OPENLDAP'] = True
-app.config['LDAP_USER_OBJECT_FILTER'] = '(&(objectclass=inetOrgPerson)(uid=%s))'
+app.config['LDAP_USER_OBJECT_FILTER'] = config['ldap']['user_object_filter']
 ldap = LDAP(app)
 
 
@@ -159,6 +179,8 @@ def get_uri_path(namespaceid, keyword, username=None):
         return False, "Username must be specified with user namespace"
     else:
         return False, "There was an error processing this url"
+
+
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -339,8 +361,9 @@ def redirect_short_url(short_url):
         except Exception as e:
             print(e)
     else:
-        redirect_url = queries.get_redirect_keyword_ns(keyword=short_url, namespace=2)['url']
-        hit_increase(short_url, namespace=2)
+        print(short_url)
+        redirect_url = queries.get_redirect_keyword_ns(keyword=short_url, namespace=1)['url']
+        hit_increase(short_url, namespace=1)
     try:
         return redirect(redirect_url)
     except Exception as e:
