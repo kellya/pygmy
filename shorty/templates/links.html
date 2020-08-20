@@ -35,6 +35,7 @@
                                     {% set urlpath = '/~' + username %}
                                 {% else %}
                                     <i class="fas fa-cog"></i>
+                                    {% set urlpath = '/' + result['namespace_name'] %}
 
                                 {% endif %}
                                 {{ result['namespace_name'] }}
