@@ -218,7 +218,14 @@ def home():
         except TypeError:
             # If we weren't given a keyword, just pass
             pass
-        if request.form.get('namespace'):
+        try:
+            if len(keyword) > 0:
+                haskeyword = True
+            else:
+                haskeyword = False
+        except TypeError:
+            haskeyword = False
+        if request.form.get('namespace') and haskeyword:
             namespace = request.form.get('namespace')
         else:
             namespace = 2
@@ -228,13 +235,6 @@ def home():
                           'namespace')
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
-            try:
-                if len(keyword) > 0:
-                    haskeyword = True
-                else:
-                    haskeyword = False
-            except TypeError:
-                haskeyword = False
             if haskeyword:
                 lastrowid = queries.insert_redirect_keyword(
                     url=original_url,
