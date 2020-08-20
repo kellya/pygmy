@@ -1,6 +1,32 @@
 CHANGES
 =======
 
+* fixed a bug to force namespace to user/2 if there is no keyword given
+* fixed custom namespace link creation
+* fixed missed hitcount on user shortcut
+* Added links for the keywords with namespace
+* Use the realm\_name configured for the logout action
+* import cleanups, and more pep8
+* pep8 cleanup to enforce 79 char line limit (mostly)
+* Added yaml config file support
+* Updated everything to work with MySQL, and determine which queries to use for create based on engine
+* Added mysql varients of create statements...I think I'm doing this wrong :/
+
+v2.0.0
+------
+
+* Updated readme to reflect namespaces addition
+* Fixed hardcoded namespace that broke hit\_count update on a custom namespace URL
+* fixed file permissions, moved wsgi.py
+* Added namespace to help, reformatted containers to match across the site
+* fixed namespace logic for hit increase with keyword and the totally broken shortlinks
+* fixed hit count logic error with namespaces, added default namespace permission for user
+* Display namespace on links page
+* added namespace URL redirect logic
+* Added namespace logic for creating keywords in different namespaces based on user permissions
+* fixed logic error with default permissions. Added default namespaces
+* Rewrote all SQL to use pugsql and reworked DB for namespaces
+
 v1.0.2
 ------
 

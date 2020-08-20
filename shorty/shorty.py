@@ -102,6 +102,7 @@ def hit_increase(recordid, namespace=1):
     """
     Updates the hit count and last used timestamp for recordid
     :param recordid: int or string specifying a unique record
+    :param namespace: int representing the namespace id
     :return: None
     """
     timestamp = calendar.timegm(datetime.datetime.now().timetuple())
