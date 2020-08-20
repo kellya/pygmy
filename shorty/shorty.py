@@ -101,7 +101,8 @@ def hit_increase(recordid, namespace=1):
     timestamp = calendar.timegm(datetime.datetime.now().timetuple())
     if type(recordid) == str:
         # We need to get the ID for the shortname/keyword
-        recordid = queries.get_record_by_keyword(keyword=recordid, namespace=namespace)['id']
+        recordid = queries.get_record_by_keyword(keyword=recordid,
+                                                 namespace=namespace)['id']
 
     queries.update_redirect_hits(lastUsed=timestamp, recordid=recordid)
 
@@ -122,7 +123,7 @@ def get_userid(username):
 def set_default_permissions(username):
     print(username)
     """
-    Create a default permission set for a user if they are not already in the db
+    Create default permission set for a user if they are not already in the db
     :param username:UID from LDAP
     :return:  None
     """
@@ -134,14 +135,16 @@ def set_default_permissions(username):
 
 def get_permissions(username):
     """
-    Gets user permissions from db, or creates a default value if user isn't already in the DB
+    Gets user permissions from db, or creates a default value if user
+    isn't already in the DB
     :param username: uid from LDAP
     :return: A dictionary containing permissions as returned from the DB
     """
     userid = get_userid(username)
     permissions = []
     if not userid:
-        # if we don't have a username from the db, it's a new user, so create it and call back
+        # if we don't have a username from the db, it's a new user,
+        # so create it and call back
         set_default_permissions(username)
         get_permissions(username)
     for permission in queries.get_user_permissions(owner=userid):
@@ -151,7 +154,7 @@ def get_permissions(username):
 
 def get_namespace_permissions(username):
     """
-    Returns a dictionary of namespaces to which the specified username has access
+    Returns dictionary of namespaces to which the specified username has access
     :param username:
     :return:
     """
@@ -214,7 +217,8 @@ def home():
             namespace = request.form.get('namespace')
         else:
             namespace = 2
-        if not queries.search_keyword(owner=userid, namespace=namespace, keyword=keyword)['count'] == 0:
+        if not queries.search_keyword(owner=userid, namespace=namespace,
+                                      keyword=keyword)['count'] == 0:
             errors.append(f'Keyword {keyword} is not unique in specified namespace')
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
@@ -227,17 +231,29 @@ def home():
                 haskeyword = False
             if haskeyword:
                 lastrowid = queries.insert_redirect_keyword(
-                    url=original_url, owner=userid, createTime=timestamp, keyword=keyword, namespace=namespace
+                    url=original_url,
+                    owner=userid,
+                    createTime=timestamp,
+                    keyword=keyword,
+                    namespace=namespace,
                 )
             else:
                 lastrowid = queries.insert_redirect(
-                    url=original_url, owner=userid, createTime=timestamp, namespace=namespace
+                    url=original_url,
+                    owner=userid,
+                    createTime=timestamp,
+                    namespace=namespace
                 )
             encoded_string = "+" + base36.dumps(lastrowid)
-            # Prepend the string with a + so we can differentiate between shortURL and custom Redirects
+            # Prepend the string with a + so we can differentiate between
+            # shortURL and custom Redirects
             url_base = f'{request.scheme}://{request.host}' or None
             if haskeyword:
-                keyword_url = url_base + get_uri_path(namespace, keyword, username)
+                keyword_url = url_base + get_uri_path(
+                    namespace,
+                    keyword,
+                    username
+                )
             else:
                 keyword_url = None
             return render_template('home.html',
@@ -250,7 +266,13 @@ def home():
                                    ns_permissions=ns_permissions,
                                    keyword_url = keyword_url,
                                    )
-    return render_template('home.html', errors=errors, metainfo=metainfo, permissions=permissions, ns_permissions=ns_permissions)
+    return render_template(
+        'home.html',
+        errors=errors,
+        metainfo=metainfo,
+        permissions=permissions,
+        ns_permissions=ns_permissions
+    )
 
 
 @app.route('/_help')
@@ -260,16 +282,24 @@ def showhelp():
     :return: jinja template for help.html
     """
     url_base = f'{request.scheme}://{request.host}' or None
-    return render_template('help.html', url_base=url_base, metainfo=metainfo, permissions=[])
+    return render_template(
+        'help.html',
+        url_base=url_base,
+        metainfo=metainfo,
+        permissions=[]
+    )
 
 
 @app.route('/_logout')
 def logout():
     """
-   Haphazardly handles a logout action for a basic authentication, which isn't really a thing for basic-auth
+   Haphazardly handles a logout action for a basic authentication, which isn't
+   really a thing for basic-auth
     :return:
     """
-    return Response('User Logout', 401, {'WWW-Authenticate': 'Basic realm="Franklin SSO"'})
+    return Response(
+        'User Logout', 401, {'WWW-Authenticate': 'Basic realm="Franklin SSO"'}
+    )
 
 
 @app.route('/_mylinks', methods=['GET'])
@@ -286,8 +316,13 @@ def mylinks():
     except Exception as e:
         success = False
     results = queries.get_shortcuts(owner=get_userid(username))
-    return render_template('links.html', results=results, metainfo=metainfo, permissions=permissions,
-                           editsuccess=success)
+    return render_template(
+        'links.html',
+        results=results,
+        metainfo=metainfo,
+        permissions=permissions,
+        editsuccess=success
+    )
 
 
 @app.route('/_edit', methods=['GET', 'POST'])
@@ -300,14 +335,18 @@ def edit_link():
 
     if request.method == 'GET':
         recordid = base36.loads(request.args.get('id'))
-        url = queries.get_record_by_id_with_owner(owner=userid, id=recordid)['url']
+        url = queries.get_record_by_id_with_owner(owner=userid,
+                                                  id=recordid)['url']
         try:
-            return render_template('edit.html', url=url, metainfo=metainfo, permissions=permissions)
+            return render_template('edit.html', url=url, metainfo=metainfo,
+                                   permissions=permissions)
         except IndexError:
-            return render_template('edit.html', url='', metainfo=metainfo, permissions=permissions,
+            return render_template('edit.html', url='', metainfo=metainfo,
+                                   permissions=permissions,
                                    errors=['No permission to edit this ID'])
     elif request.method == 'POST':
-        queries.update_redirect(updateurl=updateurl, owner=userid, id=request.args.get('id'))
+        queries.update_redirect(updateurl=updateurl, owner=userid,
+                                id=request.args.get('id'))
         return redirect(url_for('mylinks', editsuccess=True))
 
 
@@ -315,13 +354,18 @@ def edit_link():
 @ldap.basic_auth_required
 def admin():
     permissions = get_permissions(g.ldap_username)
-    return render_template('admin.html', permissions=permissions, metainfo=metainfo)
+    return render_template(
+        'admin.html',
+        permissions=permissions,
+        metainfo=metainfo
+    )
 
 
 @app.route('/<namespace>/<keyword>')
 def redirect_name_keyword(namespace, keyword):
     """
-    Name-based keywords so that users can create their own redirects that don't overwrite globals
+    Name-based keywords so that users can create their own redirects that don't
+    overwrite globals
     :param namespace:
     :param keyword:
     :return:
@@ -330,11 +374,15 @@ def redirect_name_keyword(namespace, keyword):
     if not namespace[0] == '~':
         namespace = queries.get_namespace_id_by_name(name=namespace)['id']
         hit_increase(keyword, namespace)
-        redirect_url = queries.get_namespace_redirect(namespace=namespace, keyword=keyword)
+        redirect_url = queries.get_namespace_redirect(
+            namespace=namespace,
+            keyword=keyword,
+        )
 
     else:
         ownerid = get_userid(namespace[1:])
-        redirect_url = queries.get_user_namespace_redirect(owner=ownerid, keyword=keyword)
+        redirect_url = queries.get_user_namespace_redirect(owner=ownerid,
+                                                           keyword=keyword)
 
     if redirect_url:
         redirect_url = redirect_url['url']
@@ -347,8 +395,9 @@ def redirect_name_keyword(namespace, keyword):
 @app.route('/<short_url>')
 def redirect_short_url(short_url):
     """
-    Handles shortlink/keyword redirects by pulling the destination from the DB matching a base36 encoded version
-    of the shortlink, or a /keyword link if the short_url does not start with a +
+    Handles shortlink/keyword redirects by pulling the destination from the DB
+    matching a base36 encoded version of the shortlink, or a /keyword link if
+    the short_url does not start with a +
     :param short_url:
     :return:
     """
@@ -362,13 +411,19 @@ def redirect_short_url(short_url):
             print(e)
     else:
         print(short_url)
-        redirect_url = queries.get_redirect_keyword_ns(keyword=short_url, namespace=1)['url']
+        redirect_url = queries.get_redirect_keyword_ns(keyword=short_url,
+                                                       namespace=1)['url']
         hit_increase(short_url, namespace=1)
     try:
         return redirect(redirect_url)
     except Exception as e:
         permissions = []
-        return render_template('error.html', metainfo=metainfo, permissions=permissions, url=short_url)
+        return render_template(
+            'error.html',
+            metainfo=metainfo,
+            permissions=permissions,
+            url=short_url
+        )
 
 
 @app.template_filter('humantime')
