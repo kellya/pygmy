@@ -391,6 +391,7 @@ def redirect_name_keyword(namespace, keyword):
         ownerid = get_userid(namespace[1:])
         redirect_url = queries.get_user_namespace_redirect(owner=ownerid,
                                                            keyword=keyword)
+        hit_increase(keyword, 2)
 
     if redirect_url:
         redirect_url = redirect_url['url']
