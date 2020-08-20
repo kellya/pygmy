@@ -32,15 +32,19 @@
                                     <i class="fas fa-globe"></i>
                                 {% elif result['namespace_name'] == 'user' %}
                                     <i class="fas fa-user"></i>
+                                    {% set urlpath = '/~' + username %}
                                 {% else %}
                                     <i class="fas fa-cog"></i>
+
                                 {% endif %}
                                 {{ result['namespace_name'] }}
                             </td>
                             <td>
                                 {% if result['keyword'] %}
+                                    <a href="{{ urlpath }}/{{ result['keyword'] }}" target="_blank">
                                   {{ result['keyword'] }}
-                                {% endif %}</a>
+                                    </a>
+                                {% endif %}
                             </td>
                             <td>
                                 <a href="/{{ result['id']|shortcode }}" target="_blank">{{ result['id']|shortcode }}
@@ -51,13 +55,6 @@
                             <td>{{ result['lastUsed']|humantime }}</td>
                             <td>
                                 <a class="text-dark" href="/_edit?id={{ result['id']|shortcode }}"><i class="nav-item fas fa-edit"></i></a>
-                                <!--
-                                <i class="nav-item fas fa-ban"></i>
-                                <i class="nav-item fas fa-check"></i>
-                                <a data-toggle="modal" href="#deleteModal" class="button alert-danger" data-whatever="{{ result['id']|shortcode }}">
-                                    <i class="nav-item fas fa-trash"></i>
-                                </a>
-                                -->
                             </td>
                         </tr>
                     {% endfor %}

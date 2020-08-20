@@ -329,6 +329,7 @@ def mylinks():
         results=results,
         metainfo=metainfo,
         permissions=permissions,
+        username=username,
         editsuccess=success
     )
 
