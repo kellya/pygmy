@@ -22,7 +22,8 @@ __version__ = VersionInfo('shorty').release_string()
 
 metainfo = {
     'version': __version__,
-    'changelog': 'https://git.admin.franklin.edu/tins/shorty/raw/branch/master/ChangeLog'
+    'changelog': 'https://git.admin.franklin.edu/tins/shorty/raw/branch'
+                 '/master/ChangeLog '
 }
 
 
@@ -212,7 +213,8 @@ def home():
             errors.append(f'URL {original_url} is not in the proper format')
         try:
             if len(keyword) > 0 and not keyword.isalnum():
-                errors.append('Keyword must only contain alpha-numeric characters.')
+                errors.append('Keyword must only contain alpha-numeric '
+                              'characters.')
         except TypeError:
             # If we weren't given a keyword, just pass
             pass
@@ -222,7 +224,8 @@ def home():
             namespace = 2
         if not queries.search_keyword(owner=userid, namespace=namespace,
                                       keyword=keyword)['count'] == 0:
-            errors.append(f'Keyword {keyword} is not unique in specified namespace')
+            errors.append(f'Keyword {keyword} is not unique in specified '
+                          'namespace')
         if len(errors) == 0:
             timestamp = calendar.timegm(datetime.datetime.now().timetuple())
             try:
@@ -301,7 +304,9 @@ def logout():
     :return:
     """
     return Response(
-        'User Logout', 401, {'WWW-Authenticate': 'Basic realm="Franklin SSO"'}
+        'User Logout',
+        401,
+        {'WWW-Authenticate': f'Basic realm="{config["ldap"]["realm_name"]}"'}
     )
 
 
