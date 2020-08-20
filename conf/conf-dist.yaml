@@ -1,0 +1,9 @@
+db:
+  string: engine://user:password@host/db
+ldap:
+  realm_name: Choose your auth realm
+  host: 
+  base_dn: 
+  user_object_filter: '(&(objectclass=inetOrgPerson)(uid=%s))'
+  username: 
+  password: 
