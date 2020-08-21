@@ -28,7 +28,9 @@
                     {% for result in results %}
                         <tr>
                             <td>
-                                {% if result['namespace_name'] == 'user' %}
+                                {% if result['namespace_name'] == 'global' %}
+                                    {% set urlpath = '' %}
+                                {% elif result['namespace_name'] == 'user' %}
                                     {% set urlpath = '/~' + username %}
                                 {% else %}
                                     {% set urlpath = '/' + result['namespace_name'] %}
