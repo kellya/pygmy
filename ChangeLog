@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+* fixed global link building bug introduced by db icon move
+* Moved namespace icon to db and set default values in create statements
+* Updated Readme, fixed minor url typo in default namespace description
+
+v2.0.2
+------
+
+* Bump for minor formatting and renaming changes, forcing version number because I don't know how to make pbr do it correctly
+* renamed variables to be more friendly
+
+v2.0.1
+------
+
+* Updated changelog
 * fixed a bug to force namespace to user/2 if there is no keyword given
 * fixed custom namespace link creation
 * fixed missed hitcount on user shortcut

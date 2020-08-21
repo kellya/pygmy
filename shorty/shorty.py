@@ -18,7 +18,7 @@ import pugsql
 import yaml
 from pbr.version import VersionInfo
 
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 __db_schema__ = 1
 
 meta_info = {
