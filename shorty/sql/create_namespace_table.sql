@@ -2,5 +2,6 @@
         CREATE TABLE "namespace"(
         "id" INTEGER PRIMARY KEY AUTOINCREMENT,
         "name" TEXT,
-        "description" TEXT
+        "description" TEXT,
+        "icon" TEXT
         );

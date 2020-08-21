@@ -19,6 +19,7 @@ import yaml
 from pbr.version import VersionInfo
 
 __version__ = '2.0.2'
+__db_schema__ = 1
 
 meta_info = {
     'version': __version__,
@@ -50,10 +51,31 @@ def uri_validator(uri):
         return False
 
 
+def update_schema(old, new):
+    print(f'Performing updates for {old} to {new}')
+
+
 def table_check():
     """Verify the tables exist in the db"""
     try:
+        installed_schema = queries.get_version_number()['schema_version']
+    except Exception as e:
+        print(e)
+        print('in exception, starting at 0')
+        installed_schema = 0
+
+    if installed_schema < __db_schema__:
+        update_schema(installed_schema, __db_schema__)
+    elif installed_schema == 0:
+        create_tables()
+    else:
+        print('Schema version is current, no migration needed')
+
+
+def create_tables():
+    try:
         if config['db']['string'].startswith('sqlite'):
+            queries.create_version_table()
             queries.create_owner_table()
             queries.create_namespace_table()
             queries.create_permission_table()
@@ -61,7 +83,7 @@ def table_check():
             queries.create_redirect_table()
             queries.create_apppermission_table()
         elif config['db']['string'].startswith('mysql'):
-            print('we have mysql config')
+            queries.my_create_version_table()
             queries.my_create_owner_table()
             queries.my_create_namespace_table()
             queries.my_create_permission_table()

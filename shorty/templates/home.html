@@ -26,6 +26,7 @@
                     <div class="container-lg bg-dark text-white border">
                         <label for="namespace">Namespace:</label>
                         <select name="namespace" id="namespace">
+                            <!-- <option disabled>──────────</option> -->
                             {% for row in ns_permissions %}
                             <option title="{{ row['description'] }}" value="{{ row['id'] }}" {% if (row['namespace'] == 'user') %}Selected{% endif %}>{{ row['namespace'].title() }}</option>
                             {% endfor %}

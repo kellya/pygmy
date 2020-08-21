@@ -28,17 +28,12 @@
                     {% for result in results %}
                         <tr>
                             <td>
-                                {% if result['namespace_name'] == 'global' %}
-                                    <i class="fas fa-globe"></i>
-                                {% elif result['namespace_name'] == 'user' %}
-                                    <i class="fas fa-user"></i>
+                                {% if result['namespace_name'] == 'user' %}
                                     {% set urlpath = '/~' + username %}
                                 {% else %}
-                                    <i class="fas fa-cog"></i>
                                     {% set urlpath = '/' + result['namespace_name'] %}
-
                                 {% endif %}
-                                {{ result['namespace_name'] }}
+                                <i class="fas {{ result['icon'] }}"></i> {{ result['namespace_name'] }}
                             </td>
                             <td>
                                 {% if result['keyword'] %}
