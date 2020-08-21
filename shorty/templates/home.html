@@ -24,13 +24,20 @@
                         {% if ('admin' in permissions or 'keyword' in permissions) %}
                     </div>
                     <div class="container-lg bg-dark text-white border">
-                        <label for="namespace">Namespace:</label>
-                        <select name="namespace" id="namespace">
-                            <!-- <option disabled>──────────</option> -->
+                    {% if ns_permissions|length > 1 %}
+                        <select class="selectpicker show-tick pull-left" data-header="Namespace Selection" name="namespace" id="namespace" data-selected-text-format="count>1">
                             {% for row in ns_permissions %}
-                            <option title="{{ row['description'] }}" value="{{ row['id'] }}" {% if (row['namespace'] == 'user') %}Selected{% endif %}>{{ row['namespace'].title() }}</option>
+                            <option
+                            data-icon="fas {{ row['icon'] }}"
+                                    data-subtext="{{ row['description'] }}"
+                                    value="{{ row['id'] }}"
+                                    {% if (row['namespace'] == 'user') %}Selected{% endif %}>
+                                {{ row['namespace'].title() }}
+                            </option>
                             {% endfor %}
                         </select>
+                        {% endif %}
+                    &nbsp;
                         <input type="text" id="keyword" name="keyword" class="form-control input-lg chat-input" placeholder="Keyword (optional)" />
                         <small id="keyhelp" class="form-text text-light">
                             To make a URL like {{ url_base }}/keyword
