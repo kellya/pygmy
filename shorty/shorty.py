@@ -242,10 +242,7 @@ def home():
             # If we weren't given a keyword, just pass
             pass
         try:
-            if len(keyword) > 0:
-                has_keyword = True
-            else:
-                has_keyword = False
+            has_keyword = True if len(keyword) > 0 else False
         except TypeError:
             has_keyword = False
         if request.form.get('namespace') and has_keyword:

@@ -15,13 +15,13 @@
         <p>
             Add a destination in the first box.  This should be in the format of https://www.example.com/stuff
             <br />
-            <img alt="URL submit form" src="{{ url_for('static', filename='form_url.png') }}">
+            <img alt="URL submit form" src="{{ url_for('static', filename='enter_url.png') }}">
 
         </p>
         <p>
             <div class="alert alert-dark" role="alert">
                 Note that the URL validator is expecting there to be a path included.  So if you just type www.example.com
-            you will get an error, because there is no path present.  You have to end the URL with a / if you are going to
+            you will get an error, because there is no path present.  You must end the URL with a / if you are going to
         a base URL.  So http://www.example.com will give an error, but http://www.example.com/ will work.
     </div>
         <p>Once you hit the Submit button, you will see the results page which will show your new shortened URL</p>
@@ -41,7 +41,7 @@
         <p>
             You may optionally add a /keyword URL type by specifying that keyword in addition to the destination URL
            <br/>
-            <img alt="URL submit form" src="{{ url_for('static', filename='form_keyword.png') }}">
+            <img alt="URL submit form" src="{{ url_for('static', filename='keyword.png') }}">
         </p>
         <p>
             If you specify something in the keyword field, you will get a
@@ -49,22 +49,27 @@
             they will be the same regardless of hitting the /keyword or /+0 &quot;random&quot; version.
         </p>
         <p>
-            <div class="alert alert-dark" role="alert">
-            Note: /keyword shortcuts are global.  If you want a <em>testing</em> keyword, but that keyword is already in use,
-                you will get an error
-            </div>
         <h3> What's a Namespace?</h3>
         <p>Namespaces are a way to isolate keywords so that you ultimately increase the number of keywords people may use
             as the same keywords in different namespaces do not overlap.</p>
-        <p>There are two default namespaces: global, and user.  Global are keywrods directly at the root of the domain
+        <p>There are two default namespaces: global, and user.  Global are keywords directly at the root of the domain
             so a path like {{ url_base }}/shortcut.  The user namespace matches your own username and is prefixed with a tilde (~).
             Those urls would look something like {{ url_base }}/~username/shortcut</p>
+        <p>When you expand the namespace dropdown (which defaults to user), you will see all namespaces to which you have permission:
+            <img alt="Namespace selection" src="{{ url_for('static', filename='ns_expanded.png') }}">
         <h2>Editing a destination URL</h2>
             <p>
                 You are able to edit the destination URL for any link which you have added from the <a href="{{ url_for('my_links') }}"> My Shortcuts</a> Page.
                 From that page, click on the edit icon in the "Actions" column and enter the new URL you wish the shortlink/keyword to target.
             </p>
-
+    <h3>What are the URL formats?</h3>
+    <p> There are 5 types of URLs that work for {{ url_base }}
+    <ol>
+        <li>{{ url_base }}/+# : The shortlink format where # is a base36 encoded string</li>
+        <li>{{ url_base }}/keyword :Global keyword </li>
+        <li>{{ url_base }}/~username/keyword : User's custom namespace-based keywords </li>
+        <li>{{ url_base }}/_something : Internal application paths</li>
+    </ol>
     <h3>Can I change a shortlink ID or keyword?</h3>
         <p>No, you may only change the destination URL.  The shortlinks are always assumed to go to a valid endpoint once the are created, so you are able to change the endpoint, but not the source</p>
     <h3>Can I delete a link?</h3>
