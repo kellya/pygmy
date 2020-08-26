@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+* Updated help docs to match screenshots and added url formats
+* Removed errent pull-left that was in for trying something and ultimately messing up layout.oops
+* Reworked namespace dropdown using bootstrap-select plugin to enable icons
+
+v2.0.3
+------
+
+* Version 2.0.3
 * fixed global link building bug introduced by db icon move
 * Moved namespace icon to db and set default values in create statements
 * Updated Readme, fixed minor url typo in default namespace description
