@@ -99,7 +99,7 @@ def create_tables():
 
 app = Flask(__name__)
 config = get_config('/home/kellya/projects/shorty/conf/conf.yaml')
-queries = pugsql.module('sql/')
+queries = pugsql.module(config['app']['sql_dir'])
 queries.connect(config['db']['string'])
 
 ldap_vars = [
