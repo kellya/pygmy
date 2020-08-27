@@ -1,11 +1,13 @@
 import pytest
 import sys
-from .. import shorty
+sys.path.append('./')
+sys.path.append('../')
+import shorty
 
 
 @pytest.fixture(scope='module')
 def app():
-    yield shorty.app.test_client()
+    yield app
 
 
 def test_example(client):

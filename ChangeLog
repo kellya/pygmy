@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+* moved versions back to pbr, added pytest unittest (that isn't working)
+* forgot pbr was actually required to figure out the version info
+* Added requirements.txt back, and split off a dev\_requirements for building
+* Added setup/pypi stuff
+* Updated to pull app from module for run to work and moved sqldir to config
 * Updated help docs to match screenshots and added url formats
 * Removed errent pull-left that was in for trying something and ultimately messing up layout.oops
 * Reworked namespace dropdown using bootstrap-select plugin to enable icons
