@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+v2.0.4
+------
+
+* more testing that doesn't work yet
 * moved versions back to pbr, added pytest unittest (that isn't working)
 * forgot pbr was actually required to figure out the version info
 * Added requirements.txt back, and split off a dev\_requirements for building
