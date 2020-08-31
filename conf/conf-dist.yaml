@@ -1,3 +1,6 @@
+app:
+  site_name: Friendly name for your site
+  sql_dir: #path to the sql files
 db:
   string: engine://user:password@host/db
 ldap:

@@ -2,7 +2,7 @@ import pytest
 import sys
 sys.path.append('./')
 sys.path.append('../')
-import shorty
+import pygmy
 
 
 @pytest.fixture(scope='module')
