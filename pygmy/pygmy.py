@@ -18,7 +18,7 @@ import pugsql
 import yaml
 from pbr.version import VersionInfo
 
-__version__ = VersionInfo('shorty').release_string()
+__version__ = VersionInfo('pygmy').release_string()
 __db_schema__ = 1
 
 meta_info = {
@@ -98,7 +98,7 @@ def create_tables():
 
 
 app = Flask(__name__)
-config = get_config('/home/kellya/projects/shorty/conf/conf.yaml')
+config = get_config('/home/kellya/projects/pygmy/conf/conf.yaml')
 queries = pugsql.module(config['app']['sql_dir'])
 queries.connect(config['db']['string'])
 
@@ -284,6 +284,7 @@ def home():
                 keyword_url = None
             return render_template('home.html',
                                    url_base=url_base,
+                                   site_name=config['app']['site_name'],
                                    short_url=encoded_string,
                                    keyword=keyword,
                                    errors=errors,
@@ -294,6 +295,7 @@ def home():
                                    )
     return render_template(
         'home.html',
+        site_name=config['app']['site_name'],
         errors=errors,
         metainfo=meta_info,
         permissions=permissions,
@@ -310,6 +312,7 @@ def show_help():
     url_base = f'{request.scheme}://{request.host}' or None
     return render_template(
         'help.html',
+        site_name=config['app']['site_name'],
         url_base=url_base,
         metainfo=meta_info,
         permissions=[]
@@ -347,6 +350,7 @@ def my_links():
     return render_template(
         'links.html',
         results=results,
+        site_name=config['app']['site_name'],
         metainfo=meta_info,
         permissions=permissions,
         username=username,
@@ -368,9 +372,11 @@ def edit_link():
                                                   id=recordid)['url']
         try:
             return render_template('edit.html', url=url, metainfo=meta_info,
+                                   site_name=config['app']['site_name'],
                                    permissions=permissions)
         except IndexError:
             return render_template('edit.html', url='', metainfo=meta_info,
+                                   site_name=config['app']['site_name'],
                                    permissions=permissions,
                                    errors=['No permission to edit this ID'])
     elif request.method == 'POST':
@@ -385,6 +391,7 @@ def admin():
     permissions = get_permissions(g.ldap_username)
     return render_template(
         'admin.html',
+        site_name=config['app']['site_name'],
         permissions=permissions,
         metainfo=meta_info
     )
@@ -451,6 +458,7 @@ def redirect_short_url(short_url):
         return render_template(
             'error.html',
             metainfo=meta_info,
+            site_name=config['app']['site_name'],
             permissions=permissions,
             url=short_url
         )
