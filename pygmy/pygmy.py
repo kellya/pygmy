@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from io import BytesIO
 from flask import (
     Flask,
     request,
@@ -6,7 +7,8 @@ from flask import (
     redirect,
     g,
     Response,
-    url_for
+    send_file,
+    url_for,
 )
 from flask_simpleldap import LDAP
 from urllib.parse import urlparse
@@ -15,7 +17,10 @@ import datetime
 import calendar
 import time
 import pugsql
+import qrcode
+import qrcode.image.svg
 import yaml
+from base64 import b64encode
 from pbr.version import VersionInfo
 
 __version__ = VersionInfo('pygmy').release_string()
@@ -395,6 +400,23 @@ def admin():
         permissions=permissions,
         metainfo=meta_info
     )
+
+
+@app.route('/_qr/image/<id>')
+def make_qr_image(id):
+    url_base = f'{request.scheme}://{request.host}' or None
+    img_io = BytesIO()
+    img = qrcode.make(f'{url_base}/{id}')
+    img.save(img_io)
+    img_io.seek(0)
+    return send_file(img_io, mimetype='image/png')
+
+
+@app.route('/_qr/<id>')
+def make_qr(id):
+    img = make_qr_image(id)
+    return render_template('qr.html', img=img, id=id, metainfo=meta_info,)
+
 
 
 @app.route('/<namespace>/<keyword>')
