@@ -54,6 +54,7 @@
                             <td>{{ result['lastUsed']|humantime }}</td>
                             <td>
                                 <a class="text-dark" href="/_edit?id={{ result['id']|shortcode }}"><i class="nav-item fas fa-edit"></i></a>
+                                <a class="text-dark" href="/_qr/{{ result['id']|shortcode }}"><i class="nav-item fas fa-qrcode"></i></a>
                             </td>
                         </tr>
                     {% endfor %}
